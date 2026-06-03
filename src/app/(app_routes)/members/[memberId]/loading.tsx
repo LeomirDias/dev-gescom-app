@@ -1,0 +1,9 @@
+import { MemberDetailContentLoading } from "@/app/(app_routes)/members/_components/members-route-loading"
+
+export default function Loading() {
+  return (
+    <main className="mx-auto flex w-full flex-col gap-6 p-4 md:p-8">
+      <MemberDetailContentLoading />
+    </main>
+  )
+}
