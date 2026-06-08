@@ -23,7 +23,7 @@ import type { ListSalesQuery } from "@/modules/sales/sales.schema"
 import { useSalesQuery } from "@/modules/sales/use-sales"
 
 export default function SalesPage() {
-  const { ready } = useRequireEnterprise()
+  const { ready, enterpriseId } = useRequireEnterprise()
   const perms = useOperatorPermissions()
   const [draftFilters, setDraftFilters] = useState<ListSalesQuery>(
     defaultSalesFilters()
@@ -32,6 +32,7 @@ export default function SalesPage() {
     useState<ListSalesQuery>(defaultSalesFilters())
 
   const { data, error, isPending, isFetching, refetch } = useSalesQuery({
+    enterpriseId,
     filters: appliedFilters,
     enabled: ready && perms.canConsultSales,
   })

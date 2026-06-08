@@ -45,7 +45,7 @@ import {
 } from "@/modules/sales/use-sales-analytics"
 
 export default function SalesDashboardPage() {
-  const { ready } = useRequireEnterprise()
+  const { ready, enterpriseId } = useRequireEnterprise()
   const perms = useOperatorPermissions()
 
   const [draftFilters, setDraftFilters] = useState<DashboardFilters>(
@@ -95,35 +95,58 @@ export default function SalesDashboardPage() {
     [appliedFilters.timezone, appliedFilters.userId]
   )
 
-  const realizedOverview = useRealizedOverviewQuery({ filters: baseQuery, enabled })
-  const pipelineOverview = usePipelineOverviewQuery({ filters: baseQuery, enabled })
+  const realizedOverview = useRealizedOverviewQuery({
+    enterpriseId,
+    filters: baseQuery,
+    enabled,
+  })
+  const pipelineOverview = usePipelineOverviewQuery({
+    enterpriseId,
+    filters: baseQuery,
+    enabled,
+  })
   const timeseries = useRealizedTimeseriesQuery({
+    enterpriseId,
     filters: timeseriesQuery,
     enabled,
   })
   const byPaymentType = useRealizedByPaymentTypeQuery({
+    enterpriseId,
     filters: rankingQuery,
     enabled,
   })
-  const bySeller = useRealizedBySellerQuery({ filters: rankingQuery, enabled })
+  const bySeller = useRealizedBySellerQuery({
+    enterpriseId,
+    filters: rankingQuery,
+    enabled,
+  })
   const topProducts = useRealizedTopProductsQuery({
+    enterpriseId,
     filters: topProductsQuery,
     enabled,
   })
-  const budgetFunnel = useBudgetFunnelQuery({ filters: baseQuery, enabled })
+  const budgetFunnel = useBudgetFunnelQuery({
+    enterpriseId,
+    filters: baseQuery,
+    enabled,
+  })
   const statusBreakdown = useOperationsStatusBreakdownQuery({
+    enterpriseId,
     filters: baseQuery,
     enabled,
   })
   const cancellations = useOperationsCancellationsQuery({
+    enterpriseId,
     filters: baseQuery,
     enabled,
   })
   const receivablesSummary = useReceivablesSummaryQuery({
+    enterpriseId,
     filters: receivablesQuery,
     enabled,
   })
   const receivablesAging = useReceivablesAgingQuery({
+    enterpriseId,
     filters: receivablesQuery,
     enabled,
   })

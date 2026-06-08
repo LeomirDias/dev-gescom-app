@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { Building2, ChevronsUpDown } from "lucide-react"
 import { toast } from "sonner"
 
@@ -20,7 +19,6 @@ import {
 import { cn } from "@/lib/utils"
 
 export function EnterpriseDropdown() {
-  const router = useRouter()
   const { enterprises, activeEnterprise, hydrated, switchToEnterprise } =
     useAuth()
   const [loadingId, setLoadingId] = React.useState<string | null>(null)
@@ -48,7 +46,6 @@ export function EnterpriseDropdown() {
     try {
       await switchToEnterprise(enterprise)
       toast.success("Empresa alterada.")
-      router.refresh()
     } catch (error) {
       if (error instanceof HttpError) {
         toast.error(error.message)

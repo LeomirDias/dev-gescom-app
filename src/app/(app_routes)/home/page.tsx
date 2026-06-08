@@ -39,7 +39,7 @@ const TODAY_FILTERS = {
 export default function HomePage() {
   const router = useRouter()
   const { hydrated, enterprises, activeEnterprise } = useAuth()
-  const { ready } = useRequireEnterprise()
+  const { ready, enterpriseId } = useRequireEnterprise()
   const perms = useOperatorPermissions()
 
   const needsEnterpriseSelection =
@@ -57,14 +57,17 @@ export default function HomePage() {
   const enabled = ready && perms.canConsultSales
 
   const realizedOverview = useRealizedOverviewQuery({
+    enterpriseId,
     filters: analyticsQuery,
     enabled,
   })
   const pipelineOverview = usePipelineOverviewQuery({
+    enterpriseId,
     filters: analyticsQuery,
     enabled,
   })
   const statusBreakdown = useOperationsStatusBreakdownQuery({
+    enterpriseId,
     filters: analyticsQuery,
     enabled,
   })

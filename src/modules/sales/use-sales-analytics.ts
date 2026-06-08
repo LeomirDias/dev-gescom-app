@@ -23,30 +23,30 @@ const ANALYTICS_STALE_TIME = 60_000
 
 export const salesAnalyticsQueryKeys = {
   all: ["sales-analytics"] as const,
-  realizedOverview: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "realized-overview", filters] as const,
-  realizedTimeseries: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "realized-timeseries", filters] as const,
-  byPaymentType: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "by-payment-type", filters] as const,
-  bySeller: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "by-seller", filters] as const,
-  topProducts: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "top-products", filters] as const,
-  returns: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "returns", filters] as const,
-  pipelineOverview: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "pipeline-overview", filters] as const,
-  budgetFunnel: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "budget-funnel", filters] as const,
-  statusBreakdown: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "status-breakdown", filters] as const,
-  cancellations: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "cancellations", filters] as const,
-  receivablesSummary: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "receivables-summary", filters] as const,
-  receivablesAging: (filters: AnalyticsQuery) =>
-    ["sales-analytics", "receivables-aging", filters] as const,
+  realizedOverview: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "realized-overview", filters] as const,
+  realizedTimeseries: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "realized-timeseries", filters] as const,
+  byPaymentType: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "by-payment-type", filters] as const,
+  bySeller: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "by-seller", filters] as const,
+  topProducts: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "top-products", filters] as const,
+  returns: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "returns", filters] as const,
+  pipelineOverview: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "pipeline-overview", filters] as const,
+  budgetFunnel: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "budget-funnel", filters] as const,
+  statusBreakdown: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "status-breakdown", filters] as const,
+  cancellations: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "cancellations", filters] as const,
+  receivablesSummary: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "receivables-summary", filters] as const,
+  receivablesAging: (enterpriseId: string, filters: AnalyticsQuery) =>
+    ["sales-analytics", enterpriseId, "receivables-aging", filters] as const,
 }
 
 export function dashboardFiltersToAnalyticsQuery(
@@ -66,182 +66,164 @@ export function dashboardFiltersToAnalyticsQuery(
   return { ...base, periodPreset: filters.periodPreset, ...extra }
 }
 
-export function useRealizedOverviewQuery({
-  filters,
-  enabled = true,
-}: {
+type AnalyticsQueryOpts = {
+  enterpriseId: string | undefined
   filters: AnalyticsQuery
   enabled?: boolean
-}) {
+}
+
+export function useRealizedOverviewQuery({
+  enterpriseId,
+  filters,
+  enabled = true,
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.realizedOverview(filters),
+    queryKey: salesAnalyticsQueryKeys.realizedOverview(enterpriseId ?? "", filters),
     queryFn: () => getRealizedOverviewService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useRealizedTimeseriesQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.realizedTimeseries(filters),
+    queryKey: salesAnalyticsQueryKeys.realizedTimeseries(enterpriseId ?? "", filters),
     queryFn: () => getRealizedTimeseriesService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useRealizedByPaymentTypeQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.byPaymentType(filters),
+    queryKey: salesAnalyticsQueryKeys.byPaymentType(enterpriseId ?? "", filters),
     queryFn: () => getRealizedByPaymentTypeService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useRealizedBySellerQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.bySeller(filters),
+    queryKey: salesAnalyticsQueryKeys.bySeller(enterpriseId ?? "", filters),
     queryFn: () => getRealizedBySellerService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useRealizedTopProductsQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.topProducts(filters),
+    queryKey: salesAnalyticsQueryKeys.topProducts(enterpriseId ?? "", filters),
     queryFn: () => getRealizedTopProductsService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useRealizedReturnsAnalyticsQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.returns(filters),
+    queryKey: salesAnalyticsQueryKeys.returns(enterpriseId ?? "", filters),
     queryFn: () => getRealizedReturnsService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function usePipelineOverviewQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.pipelineOverview(filters),
+    queryKey: salesAnalyticsQueryKeys.pipelineOverview(enterpriseId ?? "", filters),
     queryFn: () => getPipelineOverviewService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useBudgetFunnelQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.budgetFunnel(filters),
+    queryKey: salesAnalyticsQueryKeys.budgetFunnel(enterpriseId ?? "", filters),
     queryFn: () => getPipelineBudgetsFunnelService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useOperationsStatusBreakdownQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.statusBreakdown(filters),
+    queryKey: salesAnalyticsQueryKeys.statusBreakdown(enterpriseId ?? "", filters),
     queryFn: () => getOperationsStatusBreakdownService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useOperationsCancellationsQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.cancellations(filters),
+    queryKey: salesAnalyticsQueryKeys.cancellations(enterpriseId ?? "", filters),
     queryFn: () => getOperationsCancellationsService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useReceivablesSummaryQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.receivablesSummary(filters),
+    queryKey: salesAnalyticsQueryKeys.receivablesSummary(enterpriseId ?? "", filters),
     queryFn: () => getReceivablesSummaryService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
 export function useReceivablesAgingQuery({
+  enterpriseId,
   filters,
   enabled = true,
-}: {
-  filters: AnalyticsQuery
-  enabled?: boolean
-}) {
+}: AnalyticsQueryOpts) {
   return useQuery({
-    queryKey: salesAnalyticsQueryKeys.receivablesAging(filters),
+    queryKey: salesAnalyticsQueryKeys.receivablesAging(enterpriseId ?? "", filters),
     queryFn: () => getReceivablesAgingService(filters),
-    enabled,
+    enabled: enabled && Boolean(enterpriseId),
     staleTime: ANALYTICS_STALE_TIME,
   })
 }

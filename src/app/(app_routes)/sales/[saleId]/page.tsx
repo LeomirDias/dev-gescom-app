@@ -27,20 +27,23 @@ type SaleDetailPageProps = {
 
 export default function SaleDetailPage({ params }: SaleDetailPageProps) {
   const { saleId } = use(params)
-  const { ready } = useRequireEnterprise()
+  const { ready, enterpriseId } = useRequireEnterprise()
   const perms = useOperatorPermissions()
 
   const saleQuery = useSaleQuery({
+    enterpriseId,
     saleId,
     enabled: ready && perms.canConsultSales,
   })
 
   const returnsQuery = useSaleReturnsQuery({
+    enterpriseId,
     saleId,
     enabled: ready && perms.canConsultSaleReturns && Boolean(saleQuery.data),
   })
 
   const conversionsQuery = useBudgetConversionsQuery({
+    enterpriseId,
     saleId,
     enabled:
       ready &&

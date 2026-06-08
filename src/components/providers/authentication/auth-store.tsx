@@ -19,6 +19,7 @@ import type {
   LoginClientResponse,
   SessionBootstrap,
 } from "@/lib/auth/session-response"
+import { clearTenantQueries } from "@/lib/react-query/clear-tenant-queries"
 import {
   fetchAuthMe,
   fetchSessionBootstrap,
@@ -179,6 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setIsAuthenticated(true)
       seedAccountMeQuery(queryClient, me)
+      clearTenantQueries(queryClient)
       invalidateAccountQueries()
     },
     [invalidateAccountQueries, queryClient]
