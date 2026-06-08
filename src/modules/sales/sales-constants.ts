@@ -23,6 +23,9 @@ export function defaultSalesFilters() {
     status: undefined as SaleStatus | undefined,
     budgetClosureSituation: undefined as BudgetClosureSituation | undefined,
     userId: undefined as string | undefined,
+    orderNumber: undefined as string | undefined,
+    seller: undefined as string | undefined,
+    client: undefined as string | undefined,
   }
 }
 
@@ -39,3 +42,19 @@ export function defaultDashboardFilters() {
 }
 
 export type DashboardFilters = ReturnType<typeof defaultDashboardFilters>
+
+export type SalesDateFilters = {
+  dateFrom?: string
+  dateTo?: string
+}
+
+export function defaultSalesDateFilters(): SalesDateFilters {
+  return {
+    dateFrom: undefined,
+    dateTo: undefined,
+  }
+}
+
+export function hasActiveSalesDateFilters(filters: SalesDateFilters): boolean {
+  return Boolean(filters.dateFrom?.trim() || filters.dateTo?.trim())
+}

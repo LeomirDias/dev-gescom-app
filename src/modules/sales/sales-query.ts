@@ -13,6 +13,9 @@ export const listSalesQuerySchema = paginationQuerySchema.extend({
   status: saleStatusSchema.optional(),
   budgetClosureSituation: budgetClosureSituationSchema.optional(),
   userId: z.uuid().optional(),
+  orderNumber: z.string().trim().min(1).optional(),
+  seller: z.string().trim().min(1).optional(),
+  client: z.string().trim().min(1).optional(),
 })
 
 export type ListSalesQuery = z.infer<typeof listSalesQuerySchema>
@@ -33,6 +36,9 @@ export function buildSalesQuery(query: ListSalesQuery): string {
     params.set("budgetClosureSituation", query.budgetClosureSituation)
   }
   if (query.userId !== undefined) params.set("userId", query.userId)
+  if (query.orderNumber !== undefined) params.set("orderNumber", query.orderNumber)
+  if (query.seller !== undefined) params.set("seller", query.seller)
+  if (query.client !== undefined) params.set("client", query.client)
   const qs = params.toString()
   return qs ? `?${qs}` : ""
 }

@@ -19,6 +19,7 @@ type SalesTableProps = {
   total: number
   limit: number
   offset: number
+  localFilterActive?: boolean
   onPageChange: (offset: number) => void
 }
 
@@ -27,6 +28,7 @@ export function SalesTable({
   total,
   limit,
   offset,
+  localFilterActive = false,
   onPageChange,
 }: SalesTableProps) {
   const page = Math.floor(offset / limit) + 1
@@ -36,11 +38,49 @@ export function SalesTable({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed bg-card px-6 py-12 text-center">
-        <p className="font-medium text-foreground">Nenhuma venda encontrada</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Ajuste os filtros de pesquisa.
-        </p>
+      <div className="space-y-4">
+        <div className="rounded-lg border border-dashed bg-card px-6 py-12 text-center">
+          <p className="font-medium text-foreground">
+            {localFilterActive
+              ? "Nenhum resultado nesta página para o intervalo de datas"
+              : "Nenhuma venda encontrada"}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {localFilterActive
+              ? "Ajuste o intervalo de datas ou navegue para outra página."
+              : "Ajuste os filtros de pesquisa."}
+          </p>
+        </div>
+        {localFilterActive && total > 0 && (
+          <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
+            <p>
+              0 resultado(s) nesta página (filtro de data local) · Página {page} de{" "}
+              {totalPages} · {total} registo(s)
+            </p>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={!canPrev}
+                onClick={() => onPageChange(Math.max(0, offset - limit))}
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={!canNext}
+                onClick={() => onPageChange(offset + limit)}
+                aria-label="Página seguinte"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -130,6 +170,9 @@ export function SalesTable({
 
       <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
         <p>
+          {localFilterActive
+            ? `${items.length} resultado(s) nesta página (filtro de data local) · `
+            : ""}
           Página {page} de {totalPages} · {total} registo(s)
         </p>
         <div className="flex gap-1">
