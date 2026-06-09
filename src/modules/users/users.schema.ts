@@ -48,6 +48,21 @@ export const updateUserRequestSchema = z
 
 export type UpdateUserRequest = z.infer<typeof updateUserRequestSchema> // Tipo da requisição de atualização de usuário
 
+export const createUserRequestSchema = z.strictObject({
+  userName: z.string().trim().min(2).max(255),
+  userRegistration: cpfCnpjSchema,
+  userEmail: z.string().trim().email("E-mail inválido").max(255),
+  userPhone: phoneE164Schema,
+})
+
+export type CreateUserRequest = z.infer<typeof createUserRequestSchema>
+
+export const createUserResponseSchema = userPublicSchema.extend({
+  userRegistration: cpfCnpjSchema,
+})
+
+export type CreateUserResponse = z.infer<typeof createUserResponseSchema>
+
 // Resposta da requisição de atualização de usuário
 export const updateUserResponseSchema = userPublicSchema.omit({
   accessMode: true,

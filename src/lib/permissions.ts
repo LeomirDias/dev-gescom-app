@@ -37,6 +37,14 @@ export const PERMISSION_CODES = {
   consultarVendas: "consultar_vendas",
   consultarDevolucoesVendas: "consultar_devolucoes_vendas",
   consultarTiposPagamento: "consultar_tipos_pagamento",
+  consultarSetoresEstoque: "consultar_setores_estoque",
+  consultarLocacoesEstoque: "consultar_locacoes_estoque",
+  consultarLotesEstoque: "consultar_lotes_estoque",
+  consultarSaldosEstoque: "consultar_saldos_estoque",
+  consultarSaldosLoteEstoque: "consultar_saldos_lote_estoque",
+  consultarEstoqueMinMax: "consultar_estoque_min_max",
+  consultarMovimentosEstoque: "consultar_movimentos_estoque",
+  incluirMovimentosEstoque: "incluir_movimentos_estoque",
 } as const
 
 /** Normaliza slugs da API (`consultar_membros`) para comparação estável. */
@@ -167,6 +175,38 @@ export function useOperatorPermissions() {
       canConsultPaymentTypes: canPermission(
         set,
         PERMISSION_CODES.consultarTiposPagamento
+      ),
+      canConsultStockSectors: canPermission(
+        set,
+        PERMISSION_CODES.consultarSetoresEstoque
+      ),
+      canConsultStockLocations: canPermission(
+        set,
+        PERMISSION_CODES.consultarLocacoesEstoque
+      ),
+      canConsultStockBatches: canPermission(
+        set,
+        PERMISSION_CODES.consultarLotesEstoque
+      ),
+      canConsultStockBalances: canPermission(
+        set,
+        PERMISSION_CODES.consultarSaldosEstoque
+      ),
+      canConsultStockBatchBalances: canPermission(
+        set,
+        PERMISSION_CODES.consultarSaldosLoteEstoque
+      ),
+      canConsultStockMinMax: canPermission(
+        set,
+        PERMISSION_CODES.consultarEstoqueMinMax
+      ),
+      canConsultStockMovements: canPermission(
+        set,
+        PERMISSION_CODES.consultarMovimentosEstoque
+      ),
+      canIncludeStockMovements: canPermission(
+        set,
+        PERMISSION_CODES.incluirMovimentosEstoque
       ),
       canCreateMemberWithUser:
         canPermission(set, PERMISSION_CODES.incluirUsuarios) &&

@@ -6,9 +6,11 @@ import {
   buildAnalyticsQuery,
   cancellationsAnalyticsSchema,
   pipelineBudgetsSchema,
+  pipelineCompareSchema,
   pipelineOverviewSchema,
   pipelineTimeseriesSchema,
   rankingResponseSchema,
+  realizedCompareSchema,
   realizedOverviewSchema,
   realizedTimeseriesSchema,
   receivablesAgingSchema,
@@ -102,4 +104,20 @@ export async function getReceivablesSummaryService(query: AnalyticsQuery) {
 
 export async function getReceivablesAgingService(query: AnalyticsQuery) {
   return getAnalytics("/receivables/aging", query, receivablesAgingSchema)
+}
+
+export async function getRealizedCompareService(query: AnalyticsQuery) {
+  return getAnalytics("/realized/compare", query, realizedCompareSchema)
+}
+
+export async function getPipelineCompareService(query: AnalyticsQuery) {
+  return getAnalytics("/pipeline/compare", query, pipelineCompareSchema)
+}
+
+export async function getRealizedByProductGroupService(query: AnalyticsQuery) {
+  return getAnalytics("/realized/by-product-group", query, rankingResponseSchema)
+}
+
+export async function getRealizedByProductBrandService(query: AnalyticsQuery) {
+  return getAnalytics("/realized/by-product-brand", query, rankingResponseSchema)
 }

@@ -1,5 +1,3 @@
-import { apiFetch } from "@/lib/api/client"
-import { successEnvelopeSchema } from "@/lib/api/envelope"
 import { HttpError } from "@/lib/api/http-error"
 import {
   loginClientResponseSchema,
@@ -68,11 +66,6 @@ export async function fetchAuthMe(): Promise<MeResponse> {
   }
 
   return meResponseSchema.parse(await res.json())
-}
-
-export async function getMeService(): Promise<MeResponse> {
-  const raw = await apiFetch<unknown>("auth/me", { method: "GET" })
-  return successEnvelopeSchema(meResponseSchema).parse(raw).data
 }
 
 export async function switchEnterpriseService(

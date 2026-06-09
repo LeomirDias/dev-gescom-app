@@ -13,10 +13,16 @@ import {
   TrendingUp,
   User,
   Users,
+  Warehouse,
   type LucideIcon,
   Cog,
   FileText,
   Info,
+  MapPin,
+  Layers,
+  ArrowLeftRight,
+  Gauge,
+  History,
 } from "lucide-react"
 
 import { isSidebarPathActive } from "@/app/(app_routes)/_components/route-labels"
@@ -26,6 +32,7 @@ export type NavGroupKey =
   | "people"
   | "sales"
   | "products"
+  | "stock"
   | "config"
   | "support"
 
@@ -77,6 +84,21 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Produtos", url: "/products", icon: Package },
       { title: "Catálogo global", url: "/products/global", icon: Globe },
       { title: "Catálogos", url: "/products/catalogs", icon: BookOpen },
+    ],
+  },
+  {
+    key: "stock",
+    label: "Gestão de Estoque",
+    icon: Warehouse,
+    routes: [
+      { title: "Visão geral", url: "/stock", icon: Warehouse },
+      { title: "Setores", url: "/stock/sectors", icon: Layers },
+      { title: "Locações", url: "/stock/locations", icon: MapPin },
+      { title: "Lotes", url: "/stock/batches", icon: Package },
+      { title: "Saldos", url: "/stock/sector-rentals", icon: Gauge },
+      { title: "Saldos por lote", url: "/stock/batch-balances", icon: Layers },
+      { title: "Mín/máx", url: "/stock/min-max", icon: Gauge },
+      { title: "Movimentos", url: "/stock/movements", icon: History },
     ],
   },
   {

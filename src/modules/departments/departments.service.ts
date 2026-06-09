@@ -1,17 +1,28 @@
 import { apiFetch } from "@/lib/api/client"
-import { successEnvelopeSchema } from "@/lib/api/envelope"
+import { paginatedEnvelopeSchema, successEnvelopeSchema } from "@/lib/api/envelope"
 import {
-  listDepartmentsResponseSchema,
-  type ListDepartmentsResponse,
+  buildDepartmentsQuery,
+  departmentSchema,
+  type Department,
+  type ListDepartmentsQuery,
 } from "@/modules/departments/departments.schema"
 
-export async function listDepartmentsService(): Promise<ListDepartmentsResponse> {
-  const raw = await apiFetch<unknown>("departments", { method: "GET" })
-  return successEnvelopeSchema(listDepartmentsResponseSchema).parse(raw).data
+export async function listDepartmentsService(query: ListDepartmentsQuery = {}) {
+  const qs = buildDepartmentsQuery(query)
+  const raw = await apiFetch<unknown>(`departments${qs}`, { method: "GET" })
+  const envelope = paginatedEnvelopeSchema(departmentSchema).parse(raw)
+  return { items: envelope.data, ...envelope.pagination }
+}
+
+export async function getDepartmentService(departmentId: string): Promise<Department> {
+  const raw = await apiFetch<unknown>(`departments/${departmentId}`, {
+    method: "GET",
+  })
+  return successEnvelopeSchema(departmentSchema).parse(raw).data
 }
 
 export async function listActiveDepartmentsService() {
-  const items = await listDepartmentsService()
+  const { items } = await listDepartmentsService({ limit: 100, offset: 0 })
   return items
     .filter((d) => d.status === "ATIVO")
     .slice()

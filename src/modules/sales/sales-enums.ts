@@ -25,6 +25,26 @@ export type SaleReturnStatus = z.infer<typeof saleReturnStatusSchema>
 export const paymentTypeStatusSchema = z.enum(["ATIVO", "INATIVO"])
 export type PaymentTypeStatus = z.infer<typeof paymentTypeStatusSchema>
 
+export const saleOriginSchema = z.enum(["WEB", "MOBILE"])
+export type SaleOrigin = z.infer<typeof saleOriginSchema>
+
+export const stockBatchStatusSchema = z.enum(["ATIVO", "BLOQUEADO", "ESGOTADO"])
+export type StockBatchStatus = z.infer<typeof stockBatchStatusSchema>
+
+export const stockMovementTypeSchema = z.enum([
+  "ENTRADA",
+  "SAIDA",
+  "TRANSFERENCIA",
+  "AJUSTE",
+  "PERDA",
+  "VENDA",
+  "COMPRA",
+  "DEVOLUCAO",
+  "CANCELAMENTO",
+  "OUTROS",
+])
+export type StockMovementType = z.infer<typeof stockMovementTypeSchema>
+
 export const decimalSchema = z
   .union([z.string(), z.number()])
   .transform((v) => (typeof v === "number" ? String(v) : v))

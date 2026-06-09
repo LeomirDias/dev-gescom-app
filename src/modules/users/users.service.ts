@@ -3,8 +3,11 @@ import { paginatedEnvelopeSchema, successEnvelopeSchema } from "@/lib/api/envelo
 import {
   listUsersQuerySchema,
   userPublicSchema,
+  createUserRequestSchema,
+  createUserResponseSchema,
   updateUserRequestSchema,
   updateUserResponseSchema,
+  type CreateUserRequest,
   type ListUsersQuery,
   type UpdateUserRequest,
 } from "@/modules/users/users.schema"
@@ -43,6 +46,18 @@ export async function getUserService(enterpriseId: string, userId: string) {
     { method: "GET" }
   )
   return successEnvelopeSchema(userPublicSchema).parse(raw).data
+}
+
+export async function createUserService(
+  enterpriseId: string,
+  input: CreateUserRequest
+) {
+  const body = createUserRequestSchema.parse(input)
+  const raw = await apiFetch<unknown>(usersBase(enterpriseId), {
+    method: "POST",
+    body,
+  })
+  return successEnvelopeSchema(createUserResponseSchema).parse(raw).data
 }
 
 export async function updateUserService(

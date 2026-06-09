@@ -111,3 +111,29 @@ export const updateEnterpriseRequestSchema = z
   )
 
 export type UpdateEnterpriseRequest = z.infer<typeof updateEnterpriseRequestSchema>
+
+export const enterpriseListItemSchema = z.object({
+  id: z.uuid(),
+  tradeName: z.string(),
+  legalName: z.string(),
+  memberId: z.uuid(),
+  class: z.string(),
+})
+
+export type EnterpriseListItem = z.infer<typeof enterpriseListItemSchema>
+
+export const listEnterprisesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+})
+
+export type ListEnterprisesQuery = z.infer<typeof listEnterprisesQuerySchema>
+
+export function buildEnterprisesQuery(query: ListEnterprisesQuery): string {
+  const parsed = listEnterprisesQuerySchema.parse(query)
+  const params = new URLSearchParams()
+  if (parsed.limit !== undefined) params.set("limit", String(parsed.limit))
+  if (parsed.offset !== undefined) params.set("offset", String(parsed.offset))
+  const qs = params.toString()
+  return qs ? `?${qs}` : ""
+}

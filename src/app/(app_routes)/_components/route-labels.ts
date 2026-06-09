@@ -31,6 +31,14 @@ export const ROUTE_LABELS: Record<string, string> = {
   "/sales": "Vendas",
   "/sales/budgets": "Orçamentos",
   "/sales/dashboard": "Dashboard de Vendas",
+  "/stock": "Estoque",
+  "/stock/sectors": "Setores de estoque",
+  "/stock/locations": "Locações de estoque",
+  "/stock/batches": "Lotes de estoque",
+  "/stock/sector-rentals": "Saldos de estoque",
+  "/stock/batch-balances": "Saldos por lote",
+  "/stock/min-max": "Estoque mín/máx",
+  "/stock/movements": "Movimentos de estoque",
 }
 
 export function isSidebarPathActive(pathname: string, href: string): boolean {
