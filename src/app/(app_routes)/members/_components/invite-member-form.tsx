@@ -4,13 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,12 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { HttpError } from "@/lib/api/http-error"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
 import { MemberDepartmentsPicker } from "@/app/(app_routes)/members/_components/member-departments-picker"
-import { MEMBERS_ROUTE_CONFIG } from "@/modules/memberships/membership-route-config"
 import { MEMBER_CLASS_OPTIONS } from "@/modules/memberships/member-class-label"
+import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
 import type { EnterpriseMemberClass } from "@/modules/memberships/memberships.schema"
 import type { MemberDepartmentPayload } from "@/modules/memberships/memberships.schema"
 import {
@@ -38,31 +31,24 @@ import { useInviteMemberMutation } from "@/modules/memberships/use-members"
 
 export function InviteMemberForm({
   enterpriseId,
+  config,
 }: {
   enterpriseId: string
+  config: MembershipRouteConfig
 }) {
   const router = useRouter()
   const mutation = useInviteMemberMutation(enterpriseId)
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [invitePhone, setInvitePhone] = useState("")
   const [memberClass, setMemberClass] =
     useState<EnterpriseMemberClass>("COLABORADOR")
   const [departments, setDepartments] = useState<MemberDepartmentPayload[]>([])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const form = e.currentTarget
-    const inviteEmailRaw = (
-      form.elements.namedItem("inviteEmail") as HTMLInputElement
-    ).value
-    const invitePhoneRaw = (
-      form.elements.namedItem("invitePhone") as HTMLInputElement
-    ).value
-    const inviteEmail = inviteEmailRaw
-      ? normalizeEmail(inviteEmailRaw)
-      : undefined
-    const invitePhone = invitePhoneRaw
-      ? normalizePhone(invitePhoneRaw)
-      : undefined
-    if (!inviteEmail && !invitePhone) {
+    const email = inviteEmail ? normalizeEmail(inviteEmail) : undefined
+    const phone = invitePhone ? normalizePhone(invitePhone) : undefined
+    if (!email && !phone) {
       toast.error("Informe e-mail ou telefone.")
       return
     }
@@ -79,36 +65,23 @@ export function InviteMemberForm({
           class: memberClass,
           departments: isClienteClass(memberClass) ? [] : departments,
         },
-        inviteEmail,
-        invitePhone,
+        inviteEmail: email,
+        invitePhone: phone,
       })
-      toast.info(
-        "O usuário deve aceitar o convite com o codigo recebido por e-mail ou telefone."
-      )
-      router.push(`${MEMBERS_ROUTE_CONFIG.basePath}/${result.memberId}`)
+      toast.info(config.invite.inviteSuccessToast)
+      router.push(`${config.basePath}/${result.memberId}`)
     } catch (error) {
       if (error instanceof HttpError) {
-        toastHttpError(error, "Nao foi possivel enviar o convite.")
+        toastHttpError(error, config.invite.inviteError)
         return
       }
-      toast.error("Nao foi possivel enviar o convite.")
+      toast.error(config.invite.inviteError)
     }
   }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Convidar membro</CardTitle>
-        <CardDescription>
-          Vincule um usuário existente à empresa.
-        </CardDescription>
-      </CardHeader>
-      <Separator />
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">
-          Informe o e-mail e/ou telefone do usuário já cadastrado. Ele
-          receberá um convite para fazer parte da empresa.
-        </p>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -119,6 +92,8 @@ export function InviteMemberForm({
                   type="email"
                   autoComplete="email"
                   placeholder="Informe o e-mail"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
                 />
               </Field>
               <Field>
@@ -126,6 +101,8 @@ export function InviteMemberForm({
                   id="invitePhone"
                   name="invitePhone"
                   placeholder="Informe o telefone"
+                  value={invitePhone}
+                  onChange={(e) => setInvitePhone(e.target.value)}
                 />
               </Field>
               <Field>
@@ -161,9 +138,11 @@ export function InviteMemberForm({
               type="submit"
               disabled={mutation.isPending}
               className="w-full sm:w-auto"
-              tooltip="Enviar convite"
+              tooltip={config.invite.submitLabel}
             >
-              {mutation.isPending ? "A enviar..." : "Enviar convite"}
+              {mutation.isPending
+                ? config.invite.submitPendingLabel
+                : config.invite.submitLabel}
             </Button>
           </FieldGroup>
         </form>

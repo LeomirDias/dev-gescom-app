@@ -11,14 +11,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { HttpError } from "@/lib/api/http-error"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
 import { CLIENT_MEMBER_CLASS } from "@/modules/memberships/memberships-rules"
 import { parseMembershipSearchTerm } from "@/modules/memberships/memberships-rules"
 import { MembersFilters } from "@/app/(app_routes)/members/_components/members-filters"
+import { MembershipPageHeader } from "@/app/(app_routes)/members/_components/membership-page-header"
 import { LinkClientUsersTable } from "@/app/(app_routes)/clients/_components/link-client-users-table"
 import { useCreateMemberMutation } from "@/modules/memberships/use-members"
+import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
 import type { ListUsersQuery } from "@/modules/users/users.schema"
 import {
   defaultUsersListFilters,
@@ -26,13 +27,20 @@ import {
   getNameFromParsedSearch,
   paginateUsers,
   searchTermToUsersQuery,
-  USERS_UI_PAGE_SIZE,
 } from "@/modules/users/users-rules"
 import { useUsersQuery } from "@/modules/users/use-users"
-import { Spinner } from "@/components/ui/spinner"
+import { MembershipLinkTableLoading } from "@/app/(app_routes)/members/_components/members-route-loading"
 import type { ListMembersQuery } from "@/modules/memberships/memberships.schema"
 
-export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
+const PAGE_SIZE_OPTIONS = [20, 50, 100]
+
+export function LinkClientForm({
+  enterpriseId,
+  config,
+}: {
+  enterpriseId: string
+  config: MembershipRouteConfig
+}) {
   const router = useRouter()
   const linkMutation = useCreateMemberMutation(enterpriseId)
   const [searchTerm, setSearchTerm] = useState("")
@@ -41,6 +49,7 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
     defaultUsersListFilters
   )
   const [uiOffset, setUiOffset] = useState(0)
+  const [uiLimit, setUiLimit] = useState(50)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [searchEnabled, setSearchEnabled] = useState(false)
 
@@ -63,8 +72,8 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
   }, [listItems, appliedNameFilter])
 
   const displayedItems = useMemo(
-    () => paginateUsers(filteredItems, uiOffset),
-    [filteredItems, uiOffset]
+    () => paginateUsers(filteredItems, uiOffset, uiLimit),
+    [filteredItems, uiOffset, uiLimit]
   )
 
   const applySearch = useCallback(() => {
@@ -90,9 +99,14 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
     setSearchEnabled(false)
   }, [])
 
+  const handleLimitChange = useCallback((limit: number) => {
+    setUiLimit(limit)
+    setUiOffset(0)
+  }, [])
+
   async function handleLink() {
     if (!selectedUserId) {
-      toast.error("Selecione um usuário na lista.")
+      toast.error(config.link.selectUserError)
       return
     }
 
@@ -102,13 +116,13 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
         class: CLIENT_MEMBER_CLASS,
         departments: [],
       })
-      router.push(`/members/${member.id}`)
+      router.push(`${config.basePath}/${member.id}`)
     } catch (err) {
       if (err instanceof HttpError) {
-        toastHttpError(err, "Não foi possível vincular o cliente.")
+        toastHttpError(err, config.link.linkError)
         return
       }
-      toast.error("Não foi possível vincular o cliente.")
+      toast.error(config.link.linkError)
     }
   }
 
@@ -119,22 +133,28 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
         ? error.message
         : null
 
+  const errMeta =
+    error instanceof HttpError
+      ? { code: error.code, status: error.status, requestId: error.requestId }
+      : null
+
   const emptyFilters: ListMembersQuery = {}
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Vincular cliente</CardTitle>
-        <CardDescription>
-          Vincule um usuário existente à empresa como cliente.
-        </CardDescription>
-      </CardHeader>
-      <Separator />
-      <CardContent className="space-y-6">
-        <p className="text-sm text-muted-foreground">
-          Clientes não possuem departamentos associados nem recebem convites.
-        </p>
+    <div className="space-y-6">
+      <MembershipPageHeader
+        title={config.link.title}
+        description={config.link.description}
+        note={config.link.note}
+      />
 
+      <form
+        id={config.link.filtersFormId}
+        onSubmit={(e) => {
+          e.preventDefault()
+          applySearch()
+        }}
+      >
         <MembersFilters
           filters={emptyFilters}
           onFiltersChange={() => {}}
@@ -147,49 +167,105 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
           showClassFilter={false}
           showStatusFilter={false}
         />
+      </form>
 
-        {!searchEnabled && (
-          <p className="text-center text-sm text-primary">
-            Informe o termo completo e clique em <strong>Buscar</strong> para
-            localizar o usuário.
+      {!searchEnabled && (
+        <p
+          role="status"
+          className="rounded-lg border border-dashed bg-card px-6 py-8 text-center text-sm text-muted-foreground"
+        >
+          {config.link.searchHint}
+        </p>
+      )}
+
+      {searchEnabled && isPending && (
+        <MembershipLinkTableLoading label={config.labels.loadingList} />
+      )}
+
+      {searchEnabled && error && data && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100"
+        >
+          <p className="font-medium">Não foi possível atualizar a lista.</p>
+          <p className="mt-1 text-amber-900/90 dark:text-amber-50/90">
+            {listError}. Os valores abaixo podem estar desatualizados.
           </p>
-        )}
+        </div>
+      )}
 
-        {searchEnabled && isPending && <Spinner className="mx-auto" />}
+      {searchEnabled && listError && !data && !isPending && (
+        <Card className="border-destructive/40 ring-destructive/20">
+          <CardHeader>
+            <CardTitle className="text-destructive">
+              Erro ao buscar usuários
+            </CardTitle>
+            <CardDescription>{listError}</CardDescription>
+          </CardHeader>
+          {errMeta && (
+            <CardContent>
+              <dl className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
+                <div>
+                  <dt className="font-medium text-foreground">Código</dt>
+                  <dd className="font-mono">{errMeta.code}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-foreground">HTTP</dt>
+                  <dd>{errMeta.status}</dd>
+                </div>
+                <div className="min-w-0 sm:col-span-1">
+                  <dt className="font-medium text-foreground">Request ID</dt>
+                  <dd className="truncate font-mono">
+                    {errMeta.requestId ?? "—"}
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          )}
+        </Card>
+      )}
 
-        {searchEnabled && listError && !data && !isPending && (
-          <p className="text-center text-sm text-destructive">{listError}</p>
-        )}
+      {searchEnabled && data && !isPending && (
+        <LinkClientUsersTable
+          items={displayedItems}
+          total={filteredItems.length}
+          limit={uiLimit}
+          offset={uiOffset}
+          selectedUserId={selectedUserId}
+          onSelectUser={setSelectedUserId}
+          onPageChange={setUiOffset}
+          onLimitChange={handleLimitChange}
+          onClearFilters={clearSearch}
+          nameFilterActive={Boolean(appliedNameFilter.trim())}
+          emptyTitle={config.link.emptyList}
+          emptyHint={
+            appliedNameFilter.trim()
+              ? config.link.emptyListHintName
+              : config.link.emptyListHint
+          }
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+        />
+      )}
 
-        {searchEnabled && data && !isPending && (
-          <LinkClientUsersTable
-            items={displayedItems}
-            total={filteredItems.length}
-            limit={USERS_UI_PAGE_SIZE}
-            offset={uiOffset}
-            selectedUserId={selectedUserId}
-            onSelectUser={setSelectedUserId}
-            onPageChange={setUiOffset}
-            nameFilterActive={Boolean(appliedNameFilter.trim())}
-          />
-        )}
+      {searchEnabled && isFetching && !isPending && (
+        <p className="text-xs text-muted-foreground">Atualizando lista...</p>
+      )}
 
-        {searchEnabled && isFetching && !isPending && (
-          <p className="text-xs text-muted-foreground">Atualizando lista...</p>
-        )}
-
-        {searchEnabled && (
+      {searchEnabled && (
+        <div className="flex justify-end border-t pt-4">
           <Button
             type="button"
             disabled={linkMutation.isPending || !selectedUserId}
             onClick={() => void handleLink()}
             className="w-full sm:w-auto"
-            tooltip="Vincular como cliente"
+            tooltip={config.link.submitLabel}
           >
-            {linkMutation.isPending ? "Vinculando..." : "Vincular cliente"}
+            {linkMutation.isPending
+              ? config.link.submitPendingLabel
+              : config.link.submitLabel}
           </Button>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   )
 }

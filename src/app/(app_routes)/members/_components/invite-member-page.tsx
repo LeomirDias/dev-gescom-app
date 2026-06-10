@@ -1,6 +1,6 @@
 "use client"
 
-import { CreateMemberForm } from "@/app/(app_routes)/members/_components/create-member-form"
+import { InviteMemberForm } from "@/app/(app_routes)/members/_components/invite-member-form"
 import { MembershipPageHeader } from "@/app/(app_routes)/members/_components/membership-page-header"
 import { MembershipFormContentLoading } from "@/app/(app_routes)/members/_components/members-route-loading"
 import { RouteBreadcrumb } from "@/components/global/route-breadcrumb"
@@ -15,7 +15,7 @@ import { useRequireEnterprise } from "@/hooks/use-require-enterprise"
 import { useOperatorPermissions } from "@/lib/permissions"
 import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
 
-export function CreateMemberPageContent({
+export function InviteMemberPageContent({
   config,
 }: {
   config: MembershipRouteConfig
@@ -51,7 +51,7 @@ export function CreateMemberPageContent({
 
   if (!enterpriseId) return null
 
-  if (!perms.canCreateMemberWithUser) {
+  if (!perms.canIncludeMembers) {
     return (
       <main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-4 md:p-8">
         <RouteBreadcrumb />
@@ -59,7 +59,7 @@ export function CreateMemberPageContent({
           <CardHeader>
             <CardTitle>Sem permissão</CardTitle>
             <CardDescription>
-              Necessita de incluir_usuarios e incluir_membros.
+              Necessita da permissão incluir_membros.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -72,11 +72,11 @@ export function CreateMemberPageContent({
       <RouteBreadcrumb />
       <div className="space-y-6">
         <MembershipPageHeader
-          title={config.create.title}
-          description={config.create.description}
-          note={config.create.note}
+          title={config.invite.title}
+          description={config.invite.description}
+          note={config.invite.note}
         />
-        <CreateMemberForm enterpriseId={enterpriseId} config={config} />
+        <InviteMemberForm enterpriseId={enterpriseId} config={config} />
       </div>
     </main>
   )

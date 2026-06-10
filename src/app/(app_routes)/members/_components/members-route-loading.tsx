@@ -150,6 +150,16 @@ function DetailContentLoading({ label }: { label: string }) {
   )
 }
 
+function PageHeaderSkeleton({ withNote = true }: { withNote?: boolean }) {
+  return (
+    <div className="space-y-2">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-4 w-72" />
+      {withNote && <Skeleton className="h-4 w-full max-w-xl" />}
+    </div>
+  )
+}
+
 function FormContentLoading({ label }: { label: string }) {
   return (
     <div
@@ -159,12 +169,9 @@ function FormContentLoading({ label }: { label: string }) {
       aria-label={label}
       className="space-y-6"
     >
+      <PageHeaderSkeleton />
       <Card>
-        <CardHeader className="space-y-2">
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="h-4 w-72" />
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 pt-6 sm:grid-cols-2">
           <Skeleton className="h-18 rounded-lg sm:col-span-2" />
           <Skeleton className="h-18 rounded-lg" />
           <Skeleton className="h-18 rounded-lg" />
@@ -217,4 +224,93 @@ export function MembershipFormContentLoading({
   config: MembershipRouteConfig
 }) {
   return <FormContentLoading label={config.labels.loadingForm} />
+}
+
+function LinkTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-4 w-48" />
+      <div className="overflow-hidden rounded-lg border">
+        <div className="border-b bg-muted/40 px-4 py-3">
+          <div className="grid grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-3" />
+            ))}
+          </div>
+        </div>
+        {Array.from({ length: SKELETON_ROW_COUNT }).map((_, i) => (
+          <div
+            key={i}
+            className={
+              "border-b px-4 py-3 last:border-0" +
+              (i % 2 === 1 ? " bg-muted/20" : "")
+            }
+          >
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-4 w-2/5" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-7 w-40 rounded-lg" />
+        <div className="flex gap-1">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="size-7 rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+  )
+}
+
+function LinkContentLoading({ label }: { label: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label={label}
+      className="space-y-6"
+    >
+      <PageHeaderSkeleton />
+      <div className="rounded-lg border bg-card p-4 shadow-sm space-y-4">
+        <Skeleton className="h-9 w-full rounded-lg" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-20 rounded-lg" />
+          <Skeleton className="h-8 w-20 rounded-lg" />
+          <Skeleton className="h-8 w-20 rounded-lg" />
+        </div>
+      </div>
+      <LinkTableSkeleton />
+      <div className="flex justify-end border-t pt-4">
+        <Skeleton className="h-10 w-36 rounded-md" />
+      </div>
+    </div>
+  )
+}
+
+export function MembershipLinkTableLoading({ label }: { label: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label={label}
+    >
+      <LinkTableSkeleton />
+    </div>
+  )
+}
+
+export function MembershipLinkContentLoading({
+  config,
+}: {
+  config: MembershipRouteConfig
+}) {
+  return <LinkContentLoading label={config.labels.loadingForm} />
 }

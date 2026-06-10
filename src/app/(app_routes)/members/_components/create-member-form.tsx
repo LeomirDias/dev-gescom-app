@@ -4,13 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { HttpError } from "@/lib/api/http-error"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
 import { MemberDepartmentsPicker } from "@/app/(app_routes)/members/_components/member-departments-picker"
@@ -115,17 +108,7 @@ export function CreateMemberForm({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">{config.create.title}</CardTitle>
-        <CardDescription>{config.create.description}</CardDescription>
-      </CardHeader>
-      <Separator />
-      <CardContent>
-        {config.create.note && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            {config.create.note}
-          </p>
-        )}
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <div className="grid gap-4 sm:grid-cols-2">

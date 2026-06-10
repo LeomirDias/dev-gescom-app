@@ -74,6 +74,29 @@ export type MembershipRouteConfig = {
     submitPendingLabel: string
     createError: string
   }
+  invite: {
+    title: string
+    description: string
+    note: string
+    submitLabel: string
+    submitPendingLabel: string
+    inviteError: string
+    inviteSuccessToast: string
+  }
+  link: {
+    title: string
+    description: string
+    note: string
+    filtersFormId: string
+    searchHint: string
+    submitLabel: string
+    submitPendingLabel: string
+    linkError: string
+    selectUserError: string
+    emptyList: string
+    emptyListHint: string
+    emptyListHintName: string
+  }
 }
 
 function defaultMembersListFilters(): ListMembersQuery {
@@ -155,7 +178,34 @@ export const MEMBERS_ROUTE_CONFIG: MembershipRouteConfig = {
     note: "Ao relacionar um usuário existente, o usuário receberá um e-mail de primeiro acesso para concluir o cadastro de acesso ao sistema.",
     submitLabel: "Criar membro",
     submitPendingLabel: "A criar...",
-    createError: "Nao foi possivel criar o membro.",
+    createError: "Não foi possível criar o membro.",
+  },
+  invite: {
+    title: "Convidar membro",
+    description: "Convide um usuário existente para fazer parte da empresa.",
+    note: "Informe o e-mail e/ou telefone do usuário já cadastrado. Ele receberá um convite para fazer parte da empresa.",
+    submitLabel: "Enviar convite",
+    submitPendingLabel: "A enviar...",
+    inviteError: "Não foi possível enviar o convite.",
+    inviteSuccessToast:
+      "O usuário deve aceitar o convite com o código recebido por e-mail ou telefone.",
+  },
+  link: {
+    title: "Vincular cliente",
+    description: "Vincule um usuário existente à empresa como cliente.",
+    note: "Clientes não possuem departamentos associados nem recebem convites.",
+    filtersFormId: "clients-link-filters-form",
+    searchHint:
+      "Informe dados do usuário para localizar na lista de usuários. Ou clique em Buscar para carregar todos os usuários.",
+    submitLabel: "Vincular cliente",
+    submitPendingLabel: "Vinculando...",
+    linkError: "Não foi possível vincular o cliente.",
+    selectUserError: "Selecione um usuário na lista.",
+    emptyList: "Nenhum usuário encontrado",
+    emptyListHint:
+      "Ajuste os filtros ou pesquise no catálogo global de usuários.",
+    emptyListHintName:
+      "Nenhum resultado corresponde ao nome. Ajuste os filtros ou pesquise de novo.",
   },
 }
 
@@ -227,5 +277,32 @@ export const CLIENTS_ROUTE_CONFIG: MembershipRouteConfig = {
     submitLabel: "Criar cliente",
     submitPendingLabel: "A criar...",
     createError: "Não foi possível criar o cliente.",
+  },
+  invite: {
+    title: "Convidar membro",
+    description: "Convide um usuário existente para fazer parte da empresa.",
+    note: "Informe o e-mail e/ou telefone do usuário já cadastrado. Ele receberá um convite para fazer parte da empresa.",
+    submitLabel: "Enviar convite",
+    submitPendingLabel: "A enviar...",
+    inviteError: "Não foi possível enviar o convite.",
+    inviteSuccessToast:
+      "O usuário deve aceitar o convite com o código recebido por e-mail ou telefone.",
+  },
+  link: {
+    title: "Vincular cliente",
+    description: "Vincule um usuário existente à empresa como cliente.",
+    note: "Clientes não possuem departamentos associados nem recebem convites.",
+    filtersFormId: "clients-link-filters-form",
+    searchHint:
+      "Informe dados do usuário para localizar na lista de usuários. Ou clique em Buscar para carregar todos os usuários.",
+    submitLabel: "Vincular cliente",
+    submitPendingLabel: "Vinculando...",
+    linkError: "Não foi possível vincular o cliente.",
+    selectUserError: "Selecione um usuário na lista.",
+    emptyList: "Nenhum usuário encontrado",
+    emptyListHint:
+      "Ajuste os filtros ou pesquise no catálogo global de usuários.",
+    emptyListHintName:
+      "Nenhum resultado corresponde ao nome. Ajuste os filtros ou pesquise de novo.",
   },
 }

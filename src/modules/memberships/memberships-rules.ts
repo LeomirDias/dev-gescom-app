@@ -1,4 +1,4 @@
-import { z } from "zod"
+
 import { cpfCnpjSchema } from "@/lib/validation/cpf-cnpj"
 import { phoneE164Schema } from "@/lib/validation/phone"
 import { normalizePhoneToE164 } from "@/lib/validation/phone"
@@ -30,8 +30,6 @@ export type ParsedMembershipSearch =
   | { kind: "registration"; registration: string }
   | { kind: "phone"; phone: string }
   | { kind: "name"; name: string }
-
-const emailSchema = z.string().trim().email()
 
 /** Detecta o tipo de busca a partir de um único termo digitado pelo usuário. */
 export function parseMembershipSearchTerm(raw: string): ParsedMembershipSearch {
