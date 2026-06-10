@@ -6,6 +6,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
 
+const SKELETON_ROW_COUNT = 8
+
 function ListContentLoading({ label }: { label: string }) {
   return (
     <div
@@ -15,25 +17,75 @@ function ListContentLoading({ label }: { label: string }) {
       aria-label={label}
       className="space-y-6"
     >
-      <Card>
-        <CardHeader className="space-y-2">
-          <Skeleton className="h-7 w-40" />
-          <Skeleton className="h-4 w-56" />
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-32" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-20 w-full rounded-lg" />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <Skeleton className="h-48 w-full rounded-lg" />
-        </CardContent>
-      </Card>
+      {/* Header skeleton */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-32 rounded-lg" />
+          <Skeleton className="h-8 w-24 rounded-lg" />
+        </div>
+      </div>
+
+      {/* Filters skeleton */}
+      <div className="rounded-lg border bg-card p-4 shadow-sm space-y-4">
+        <Skeleton className="h-9 w-full rounded-lg" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-[62px] rounded-lg" />
+          <Skeleton className="h-[62px] rounded-lg" />
+          <Skeleton className="h-[62px] rounded-lg" />
+          <Skeleton className="h-[62px] rounded-lg" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-20 rounded-lg" />
+          <Skeleton className="h-8 w-20 rounded-lg" />
+        </div>
+      </div>
+
+      {/* Table skeleton */}
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-48" />
+        <div className="overflow-hidden rounded-lg border">
+          {/* Header row */}
+          <div className="border-b bg-muted/40 px-4 py-3">
+            <div className="grid grid-cols-5 gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-3" />
+              ))}
+            </div>
+          </div>
+          {/* Data rows */}
+          {Array.from({ length: SKELETON_ROW_COUNT }).map((_, i) => (
+            <div
+              key={i}
+              className={
+                "border-b px-4 py-3 last:border-0" +
+                (i % 2 === 1 ? " bg-muted/20" : "")
+              }
+            >
+              <div className="grid grid-cols-5 gap-4 items-center">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-4 w-2/5" />
+                <Skeleton className="h-5 w-14 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Pagination skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-7 w-40 rounded-lg" />
+          <div className="flex gap-1">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <Skeleton key={i} className="size-7 rounded-lg" />
+            ))}
+          </div>
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
     </div>
   )
 }

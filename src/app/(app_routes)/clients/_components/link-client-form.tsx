@@ -14,33 +14,29 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { HttpError } from "@/lib/api/http-error"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
-import { CLIENTS_ROUTE_CONFIG } from "@/modules/memberships/membership-route-config"
 import { CLIENT_MEMBER_CLASS } from "@/modules/memberships/memberships-rules"
-import { LinkClientUsersFilters } from "@/app/(app_routes)/clients/_components/link-client-users-filters"
+import { parseMembershipSearchTerm } from "@/modules/memberships/memberships-rules"
+import { MembersFilters } from "@/app/(app_routes)/members/_components/members-filters"
 import { LinkClientUsersTable } from "@/app/(app_routes)/clients/_components/link-client-users-table"
 import { useCreateMemberMutation } from "@/modules/memberships/use-members"
 import type { ListUsersQuery } from "@/modules/users/users.schema"
 import {
   defaultUsersListFilters,
-  draftFiltersToUsersQuery,
-  emptyLinkUsersDraftFilters,
   filterUsersByName,
+  getNameFromParsedSearch,
   paginateUsers,
+  searchTermToUsersQuery,
   USERS_UI_PAGE_SIZE,
-  type LinkUsersDraftFilters,
 } from "@/modules/users/users-rules"
 import { useUsersQuery } from "@/modules/users/use-users"
 import { Spinner } from "@/components/ui/spinner"
+import type { ListMembersQuery } from "@/modules/memberships/memberships.schema"
 
 export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
   const router = useRouter()
   const linkMutation = useCreateMemberMutation(enterpriseId)
-  const [draftFilters, setDraftFilters] = useState<LinkUsersDraftFilters>(
-    emptyLinkUsersDraftFilters
-  )
-  const [appliedDraft, setAppliedDraft] = useState<LinkUsersDraftFilters>(
-    emptyLinkUsersDraftFilters
-  )
+  const [searchTerm, setSearchTerm] = useState("")
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState("")
   const [appliedQuery, setAppliedQuery] = useState<ListUsersQuery>(
     defaultUsersListFilters
   )
@@ -54,29 +50,40 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
     enabled: searchEnabled,
   })
 
+  const appliedParsed = useMemo(
+    () => parseMembershipSearchTerm(appliedSearchTerm),
+    [appliedSearchTerm]
+  )
+  const appliedNameFilter = getNameFromParsedSearch(appliedParsed)
+
   const listItems = data?.items
   const filteredItems = useMemo(() => {
     if (!listItems) return []
-    return filterUsersByName(listItems, appliedDraft.name)
-  }, [listItems, appliedDraft.name])
+    return filterUsersByName(listItems, appliedNameFilter)
+  }, [listItems, appliedNameFilter])
 
   const displayedItems = useMemo(
     () => paginateUsers(filteredItems, uiOffset),
     [filteredItems, uiOffset]
   )
 
-  const applyFilters = useCallback(() => {
-    setAppliedDraft(draftFilters)
-    setAppliedQuery(draftFiltersToUsersQuery(draftFilters))
+  const applySearch = useCallback(() => {
+    const { query, error: validationError } = searchTermToUsersQuery(searchTerm)
+    if (validationError) {
+      toast.error(validationError)
+      return
+    }
+
+    setAppliedSearchTerm(searchTerm)
+    setAppliedQuery(query)
     setUiOffset(0)
     setSelectedUserId(null)
     setSearchEnabled(true)
-  }, [draftFilters])
+  }, [searchTerm])
 
-  const clearFilters = useCallback(() => {
-    const resetDraft = emptyLinkUsersDraftFilters()
-    setDraftFilters(resetDraft)
-    setAppliedDraft(resetDraft)
+  const clearSearch = useCallback(() => {
+    setSearchTerm("")
+    setAppliedSearchTerm("")
     setAppliedQuery(defaultUsersListFilters())
     setUiOffset(0)
     setSelectedUserId(null)
@@ -95,7 +102,7 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
         class: CLIENT_MEMBER_CLASS,
         departments: [],
       })
-      router.push(`${CLIENTS_ROUTE_CONFIG.basePath}/${member.id}`)
+      router.push(`/members/${member.id}`)
     } catch (err) {
       if (err instanceof HttpError) {
         toastHttpError(err, "Não foi possível vincular o cliente.")
@@ -112,6 +119,8 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
         ? error.message
         : null
 
+  const emptyFilters: ListMembersQuery = {}
+
   return (
     <Card>
       <CardHeader>
@@ -126,25 +135,30 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
           Clientes não possuem departamentos associados nem recebem convites.
         </p>
 
-        <LinkClientUsersFilters
-          draft={draftFilters}
-          onChange={setDraftFilters}
-          onApply={applyFilters}
-          onClear={clearFilters}
+        <MembersFilters
+          filters={emptyFilters}
+          onFiltersChange={() => {}}
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          onSearch={applySearch}
+          onApplyFilters={() => {}}
+          onClear={clearSearch}
+          isSearching={isFetching}
+          showClassFilter={false}
+          showStatusFilter={false}
         />
 
         {!searchEnabled && (
           <p className="text-center text-sm text-primary">
-            Utilize os filtros e busque por um usuário específico ou clique em pesquisar para ver todos os usuários.
+            Informe o termo completo e clique em <strong>Buscar</strong> para
+            localizar o usuário.
           </p>
         )}
 
-        {searchEnabled && isPending && (
-          <Spinner className="mx-auto" />
-        )}
+        {searchEnabled && isPending && <Spinner className="mx-auto" />}
 
         {searchEnabled && listError && !data && !isPending && (
-          <p className="text-sm text-center text-destructive">{listError}</p>
+          <p className="text-center text-sm text-destructive">{listError}</p>
         )}
 
         {searchEnabled && data && !isPending && (
@@ -156,7 +170,7 @@ export function LinkClientForm({ enterpriseId }: { enterpriseId: string }) {
             selectedUserId={selectedUserId}
             onSelectUser={setSelectedUserId}
             onPageChange={setUiOffset}
-            nameFilterActive={Boolean(appliedDraft.name.trim())}
+            nameFilterActive={Boolean(appliedNameFilter.trim())}
           />
         )}
 

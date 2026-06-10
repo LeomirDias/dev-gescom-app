@@ -160,7 +160,7 @@ export const MEMBERS_ROUTE_CONFIG: MembershipRouteConfig = {
 }
 
 export const CLIENTS_ROUTE_CONFIG: MembershipRouteConfig = {
-  basePath: "/clients",
+  basePath: "/members",
   defaultListFilters: defaultClientListFilters,
   requiredClass: CLIENT_MEMBER_CLASS,
   labels: {

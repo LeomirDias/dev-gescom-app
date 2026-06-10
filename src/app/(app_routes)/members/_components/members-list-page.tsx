@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 
 import { useRegisterPageRefresh } from "@/app/(app_routes)/_components/page-refresh"
 import { MembersFilters } from "@/app/(app_routes)/members/_components/members-filters"
@@ -18,6 +18,7 @@ import { useRequireEnterprise } from "@/hooks/use-require-enterprise"
 import { HttpError } from "@/lib/api/http-error"
 import { useOperatorPermissions } from "@/lib/permissions"
 import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
+import { filterMembersByName } from "@/modules/memberships/memberships-rules"
 import { useMembersListFilters } from "@/modules/memberships/use-members-list-filters"
 import { useMembersQuery } from "@/modules/memberships/use-members"
 
@@ -29,19 +30,79 @@ export function MembersListPage({
   const { ready, enterpriseId } = useRequireEnterprise()
   const perms = useOperatorPermissions()
   const {
+    searchTerm,
+    setSearchTerm,
+    clientNameFilter,
     draftFilters,
     setDraftFilters,
     appliedFilters,
-    applyFiltersFromForm,
+    applySearch,
+    applyFilters,
+    handleSearchResult,
     clearFilters,
     setPageOffset,
+    setLimit,
   } = useMembersListFilters(config)
+
+  const isExplicitSearch = useRef(false)
 
   const { data, error, isPending, isFetching, refetch } = useMembersQuery({
     enterpriseId,
     filters: appliedFilters,
     enabled: ready && perms.canConsultMembers,
   })
+
+  const isClientPagination = Boolean(clientNameFilter)
+
+  const filteredItems = useMemo(() => {
+    if (!data) return []
+    if (!clientNameFilter) return data.items
+    return filterMembersByName(data.items, clientNameFilter)
+  }, [data, clientNameFilter])
+
+  const tableItems = useMemo(() => {
+    if (!isClientPagination) return filteredItems
+    const offset = appliedFilters.offset ?? 0
+    const limit = appliedFilters.limit ?? data?.limit ?? 50
+    return filteredItems.slice(offset, offset + limit)
+  }, [
+    filteredItems,
+    isClientPagination,
+    appliedFilters.offset,
+    appliedFilters.limit,
+    data?.limit,
+  ])
+
+  const tableTotal = isClientPagination ? filteredItems.length : (data?.total ?? 0)
+  const tableOffset = isClientPagination
+    ? (appliedFilters.offset ?? 0)
+    : (data?.offset ?? 0)
+  const tableLimit = appliedFilters.limit ?? data?.limit ?? 50
+
+  useEffect(() => {
+    if (!isExplicitSearch.current) return
+    if (isFetching || isPending) return
+    if (!data) return
+    isExplicitSearch.current = false
+    handleSearchResult(isClientPagination ? filteredItems : data.items)
+  }, [
+    isFetching,
+    isPending,
+    data,
+    filteredItems,
+    isClientPagination,
+    handleSearchResult,
+  ])
+
+  function handleSearch() {
+    const ok = applySearch()
+    if (ok) isExplicitSearch.current = true
+  }
+
+  function handleApplyFilters() {
+    const ok = applyFilters()
+    if (ok) isExplicitSearch.current = false
+  }
 
   const handleRefresh = useCallback(() => {
     void refetch()
@@ -158,27 +219,34 @@ export function MembersListPage({
             id={config.list.filtersFormId}
             onSubmit={(e) => {
               e.preventDefault()
-              applyFiltersFromForm()
+              handleSearch()
             }}
           >
             <MembersFilters
               filters={draftFilters}
-              onChange={setDraftFilters}
-              onApply={applyFiltersFromForm}
+              onFiltersChange={setDraftFilters}
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              onSearch={handleSearch}
+              onApplyFilters={handleApplyFilters}
               onClear={clearFilters}
+              isSearching={isFetching && !isPending}
               showClassFilter={config.list.showClassFilter}
             />
           </form>
           <MembersTable
-            items={data.items}
-            total={data.total}
-            limit={data.limit}
-            offset={data.offset}
-            basePath={config.basePath}
+            items={tableItems}
+            total={tableTotal}
+            limit={tableLimit}
+            offset={tableOffset}
+            basePath="/members"
             showClassColumn={config.list.showClassColumn}
             emptyTitle={config.labels.emptyList}
             emptyHint={config.labels.emptyListHint}
+            canEdit={perms.canAlterMembers}
             onPageChange={setPageOffset}
+            onLimitChange={setLimit}
+            onClearFilters={clearFilters}
           />
         </div>
       )}

@@ -65,7 +65,13 @@ export function useRegisterPageRefresh({
 }) {
   const { onRefreshRef, setStatus } = usePageRefreshContext()
 
-  onRefreshRef.current = enabled ? onRefresh : null
+  useEffect(() => {
+    onRefreshRef.current = enabled ? onRefresh : null
+
+    return () => {
+      onRefreshRef.current = null
+    }
+  }, [enabled, onRefresh, onRefreshRef])
 
   useEffect(() => {
     if (!enabled) {

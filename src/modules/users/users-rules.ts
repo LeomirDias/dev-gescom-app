@@ -1,11 +1,11 @@
+import { z } from "zod"
 import type { ListUsersQuery } from "@/modules/users/users.schema"
 import type { User } from "@/modules/users/users.schema"
 import { cpfCnpjSchema } from "@/lib/validation/cpf-cnpj"
 import { phoneE164Schema } from "@/lib/validation/phone"
 import {
-  normalizeEmail,
-  normalizePhone,
-  normalizeRegistration,
+  parseMembershipSearchTerm,
+  type ParsedMembershipSearch,
 } from "@/modules/memberships/memberships-rules"
 
 /** Limite maximo enviado na listagem da API (uma unica requisicao). */
@@ -18,43 +18,57 @@ export function defaultUsersListFilters(): ListUsersQuery {
   return { limit: USERS_API_LIST_LIMIT, offset: 0 }
 }
 
-export type LinkUsersDraftFilters = {
-  name: string
-  registration: string
-  email: string
-  phone: string
+const emailSchema = z.string().trim().email()
+
+/** Converte termo unificado de busca em query da API (nome e filtrado no cliente). */
+export function searchTermToUsersQuery(
+  term: string
+): { query: ListUsersQuery; error?: string } {
+  const parsed = parseMembershipSearchTerm(term)
+  const base = defaultUsersListFilters()
+
+  switch (parsed.kind) {
+    case "empty":
+      return { query: base }
+    case "email": {
+      const valid = emailSchema.safeParse(parsed.email)
+      if (!valid.success) {
+        return { query: base, error: "E-mail inválido." }
+      }
+      return { query: { ...base, email: valid.data } }
+    }
+    case "registration": {
+      const valid = cpfCnpjSchema.safeParse(parsed.registration)
+      if (!valid.success) {
+        return { query: base, error: "CPF/CNPJ inválido." }
+      }
+      return { query: { ...base, registration: valid.data } }
+    }
+    case "phone": {
+      const valid = phoneE164Schema.safeParse(parsed.phone)
+      if (!valid.success) {
+        return {
+          query: base,
+          error: "Telefone inválido. Use o formato (DD) 9XXXX-XXXX.",
+        }
+      }
+      return { query: { ...base, phone: valid.data } }
+    }
+    case "name":
+      if (parsed.name.length < 2) {
+        return {
+          query: base,
+          error: "Informe ao menos 2 caracteres para buscar por nome.",
+        }
+      }
+      return { query: base }
+  }
 }
 
-export function emptyLinkUsersDraftFilters(): LinkUsersDraftFilters {
-  return { name: "", registration: "", email: "", phone: "" }
-}
-
-/** Converte rascunho do formulario em query da API (nome e filtrado no cliente). */
-export function draftFiltersToUsersQuery(
-  draft: LinkUsersDraftFilters
-): ListUsersQuery {
-  const registrationRaw = normalizeRegistration(draft.registration)
-  const email = draft.email.trim() ? normalizeEmail(draft.email) : undefined
-  const phoneRaw = draft.phone.trim() ? normalizePhone(draft.phone) : ""
-
-  let registration: string | undefined
-  if (registrationRaw.length >= 11) {
-    const parsed = cpfCnpjSchema.safeParse(registrationRaw)
-    registration = parsed.success ? parsed.data : undefined
-  }
-
-  let phone: string | undefined
-  if (phoneRaw) {
-    const parsed = phoneE164Schema.safeParse(phoneRaw)
-    phone = parsed.success ? parsed.data : undefined
-  }
-
-  return {
-    ...defaultUsersListFilters(),
-    registration,
-    email,
-    phone,
-  }
+export function getNameFromParsedSearch(
+  parsed: ParsedMembershipSearch
+): string {
+  return parsed.kind === "name" ? parsed.name : ""
 }
 
 export function filterUsersByName(items: User[], name: string): User[] {

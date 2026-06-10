@@ -4,10 +4,5 @@ import { MemberDetailPageContent } from "@/app/(app_routes)/members/_components/
 import { MEMBERS_ROUTE_CONFIG } from "@/modules/memberships/membership-route-config"
 
 export default function MemberDetailPage() {
-  return (
-    <MemberDetailPageContent
-      config={MEMBERS_ROUTE_CONFIG}
-      paramKey="memberId"
-    />
-  )
+  return <MemberDetailPageContent config={MEMBERS_ROUTE_CONFIG} />
 }

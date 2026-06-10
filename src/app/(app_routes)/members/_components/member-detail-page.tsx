@@ -34,13 +34,11 @@ const memberIdSchema = z.uuid()
 
 export function MemberDetailPageContent({
   config,
-  paramKey,
 }: {
   config: MembershipRouteConfig
-  paramKey: "memberId" | "clientId"
 }) {
   const params = useParams()
-  const rawId = typeof params[paramKey] === "string" ? params[paramKey] : ""
+  const rawId = typeof params["memberId"] === "string" ? params["memberId"] : ""
   const idResult = memberIdSchema.safeParse(rawId)
   const memberId = idResult.success ? idResult.data : null
 

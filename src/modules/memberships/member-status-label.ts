@@ -6,8 +6,8 @@ const STATUS_LABELS: Record<MemberStatus, string> = {
   BLOQUEADO: "Bloqueado",
   PENDENTE: "Pendente",
   ESPECIAL: "Especial",
-  COBRANCA: "Cobranca",
-  NAO_VENDER: "Nao vender",
+  COBRANCA: "Cobrança",
+  NAO_VENDER: "Não vender",
 }
 
 export function getMemberStatusLabel(status: MemberStatus | string): string {

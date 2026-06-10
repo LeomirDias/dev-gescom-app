@@ -20,7 +20,6 @@ import {
   Info,
   MapPin,
   Layers,
-  ArrowLeftRight,
   Gauge,
   History,
 } from "lucide-react"

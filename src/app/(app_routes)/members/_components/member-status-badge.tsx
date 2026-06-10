@@ -7,6 +7,12 @@ const STATUS_STYLES: Record<string, string> = {
     "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100",
   INATIVO: "border-border bg-muted/50 text-muted-foreground",
   BLOQUEADO: "border-destructive/40 bg-destructive/10 text-destructive",
+  NAO_VENDER:
+    "border-red-500/40 bg-red-500/10 text-red-800 dark:text-red-200",
+  ESPECIAL:
+    "border-purple-500/40 bg-purple-500/10 text-purple-800 dark:text-purple-200",
+  COBRANCA:
+    "border-blue-500/40 bg-blue-500/10 text-blue-800 dark:text-blue-200",
 }
 
 export function MemberStatusBadge({
@@ -19,7 +25,7 @@ export function MemberStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex h-5 items-center rounded-full border px-2.5 text-xs font-medium",
         STATUS_STYLES[status] ??
           "border-border bg-muted/30 text-muted-foreground",
         className
