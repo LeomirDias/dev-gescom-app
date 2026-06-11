@@ -53,7 +53,6 @@ export type MembershipRouteConfig = {
   }
   detail: {
     showDepartments: boolean
-    showPermissions: boolean
     allowClassEdit: boolean
     linkCardTitle: string
     linkCardDescription: string
@@ -159,7 +158,6 @@ export const MEMBERS_ROUTE_CONFIG: MembershipRouteConfig = {
   },
   detail: {
     showDepartments: true,
-    showPermissions: true,
     allowClassEdit: true,
     linkCardTitle: "Dados de vínculo",
     linkCardDescription: "Informações de vínculo do membro",
@@ -256,7 +254,6 @@ export const CLIENTS_ROUTE_CONFIG: MembershipRouteConfig = {
   },
   detail: {
     showDepartments: false,
-    showPermissions: false,
     allowClassEdit: false,
     linkCardTitle: "Vínculo",
     linkCardDescription: "Cliente na empresa",

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Building2, Pencil, Plus, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,10 +11,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { HttpError } from "@/lib/api/http-error"
+import { useOperatorPermissions } from "@/lib/permissions"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
 import { ConfirmSoftDeleteDialog } from "@/components/global/confirm-soft-delete-dialog"
 import { MemberDepartmentForm } from "@/app/(app_routes)/members/_components/member-department-form"
 import { MemberStatusBadge } from "@/app/(app_routes)/members/_components/member-status-badge"
+import { useDepartmentsQuery } from "@/modules/departments/use-departments"
 import type { MemberDepartment, MemberDetail } from "@/modules/memberships/memberships.schema"
 import { useUpdateMemberDepartmentMutation } from "@/modules/memberships/use-members"
 
@@ -22,13 +24,21 @@ export function MemberDepartmentsSection({
   enterpriseId,
   member,
   canAlter,
-  departmentNameById,
 }: {
   enterpriseId: string
   member: MemberDetail
   canAlter: boolean
-  departmentNameById: Map<string, string>
 }) {
+  const perms = useOperatorPermissions()
+  const catalogQuery = useDepartmentsQuery(perms.canConsultDepartments)
+
+  const departmentNameById = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const d of catalogQuery.data ?? []) {
+      map.set(d.id, d.name)
+    }
+    return map
+  }, [catalogQuery.data])
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<MemberDepartment | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<MemberDepartment | null>(
@@ -64,9 +74,9 @@ export function MemberDepartmentsSection({
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-md">
             <Building2 className="size-4 text-primary" aria-hidden />
-            <CardTitle className="text-md">Departamentos</CardTitle>
+            Departamentos
           </CardTitle>
         </div>
         {canAlter && (
@@ -101,9 +111,6 @@ export function MemberDepartmentsSection({
               >
                 <div className="min-w-0">
                   <p className="font-medium">{name}</p>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    memberDepartmentId: {d.id}
-                  </p>
                   {d.mainDepartment && (
                     <span className="mt-1 inline-block text-xs font-medium text-primary">
                       Principal
@@ -154,6 +161,7 @@ export function MemberDepartmentsSection({
           memberId={member.id}
           existingDepartmentIds={existingIds}
           editing={editing}
+          departmentNameById={departmentNameById}
         />
       )}
 
@@ -161,7 +169,7 @@ export function MemberDepartmentsSection({
         open={Boolean(deleteTarget)}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
         title="Remover departamento?"
-        description="O vinculo sera inactivado e permissoes associadas removidas."
+        description="O vínculo com este departamento será inativado."
         confirmLabel="Remover"
         isPending={deleteMutation.isPending}
         onConfirm={() => void confirmDelete()}

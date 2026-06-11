@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
@@ -34,6 +34,7 @@ type MemberDepartmentFormProps = {
   enterpriseId: string
   memberId: string
   existingDepartmentIds: string[]
+  departmentNameById: Map<string, string>
   editing?: MemberDepartment | null
 }
 
@@ -43,6 +44,7 @@ export function MemberDepartmentForm({
   enterpriseId,
   memberId,
   existingDepartmentIds,
+  departmentNameById,
   editing = null,
 }: MemberDepartmentFormProps) {
   const addMutation = useAddMemberDepartmentMutation(enterpriseId, memberId)
@@ -55,12 +57,14 @@ export function MemberDepartmentForm({
     open && !editing && perms.canConsultDepartments
   )
 
-  const [departmentId, setDepartmentId] = useState(
-    editing?.departmentId ?? ""
-  )
-  const [mainDepartment, setMainDepartment] = useState(
-    editing?.mainDepartment ?? false
-  )
+  const [departmentId, setDepartmentId] = useState("")
+  const [mainDepartment, setMainDepartment] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    setDepartmentId(editing?.departmentId ?? "")
+    setMainDepartment(editing?.mainDepartment ?? false)
+  }, [open, editing])
 
   const catalogOptions =
     catalogQuery.data?.map((d) => ({
@@ -72,10 +76,14 @@ export function MemberDepartmentForm({
     (o) => !existingDepartmentIds.includes(o.departmentId)
   )
 
+  const editingDepartmentName = editing
+    ? (departmentNameById.get(editing.departmentId) ?? editing.departmentId)
+    : ""
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!editing && (catalogQuery.isPending || catalogQuery.error)) {
-      toast.error("Nao foi possivel carregar o catalogo de departamentos.")
+      toast.error("Não foi possível carregar o catálogo de departamentos.")
       return
     }
     if (!departmentId && !editing) {
@@ -104,12 +112,12 @@ export function MemberDepartmentForm({
         toastHttpError(
           error,
           editing
-            ? "Nao foi possivel atualizar o departamento."
-            : "Nao foi possivel adicionar o departamento."
+            ? "Não foi possível atualizar o departamento."
+            : "Não foi possível adicionar o departamento."
         )
         return
       }
-      toast.error("Operacao falhou.")
+      toast.error("Operação falhou.")
     }
   }
 
@@ -128,7 +136,9 @@ export function MemberDepartmentForm({
             {editing ? "Editar departamento" : "Adicionar departamento"}
           </SheetTitle>
           <SheetDescription>
-            Vinculo membro-departamento (memberDepartmentId no detalhe).
+            {editing
+              ? "Altere se este departamento é o principal do membro."
+              : "Vincule o membro a um departamento da empresa."}
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="mt-6">
@@ -162,22 +172,20 @@ export function MemberDepartmentForm({
                 </Select>
                 {!perms.canConsultDepartments && (
                   <p className="mt-1 text-xs text-destructive">
-                    Sem permissao para consultar departamentos.
+                    Sem permissão para consultar departamentos.
                   </p>
                 )}
                 {perms.canConsultDepartments && catalogQuery.error && (
                   <p className="mt-1 text-xs text-destructive">
-                    Nao foi possivel carregar o catalogo de departamentos.
+                    Não foi possível carregar o catálogo de departamentos.
                   </p>
                 )}
               </Field>
             )}
             {editing && (
               <Field>
-                <FieldLabel>departmentId</FieldLabel>
-                <p className="font-mono text-xs text-muted-foreground">
-                  {editing.departmentId}
-                </p>
+                <FieldLabel>Departamento</FieldLabel>
+                <p className="text-sm font-medium">{editingDepartmentName}</p>
               </Field>
             )}
             <Field>
@@ -186,6 +194,7 @@ export function MemberDepartmentForm({
                   type="checkbox"
                   checked={mainDepartment}
                   onChange={(e) => setMainDepartment(e.target.checked)}
+                  disabled={isPending}
                 />
                 Departamento principal
               </label>

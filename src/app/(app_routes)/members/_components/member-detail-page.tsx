@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { z } from "zod"
 
 import { useRegisterPageRefresh } from "@/app/(app_routes)/_components/page-refresh"
@@ -13,7 +13,6 @@ import {
 import { MembershipDetailContentLoading } from "@/app/(app_routes)/members/_components/members-route-loading"
 import { UserOnboardingPanel } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-panel"
 import { MemberDepartmentsSection } from "@/app/(app_routes)/members/_components/member-departments-section"
-import { MemberPermissionsSection } from "@/app/(app_routes)/members/_components/member-permissions-section"
 import { RouteBreadcrumb } from "@/components/global/route-breadcrumb"
 import {
   Card,
@@ -64,16 +63,6 @@ export function MemberDetailPageContent({
     userId,
     enabled: ready && perms.canConsultUsers && Boolean(userId),
   })
-
-  const departmentNameById = useMemo(() => {
-    const map = new Map<string, string>()
-    for (const d of data?.departments ?? []) {
-      if (!map.has(d.departmentId)) {
-        map.set(d.departmentId, d.departmentId)
-      }
-    }
-    return map
-  }, [data?.departments])
 
   const matchesRequiredClass =
     !config.requiredClass || data?.class === config.requiredClass
@@ -308,17 +297,6 @@ export function MemberDetailPageContent({
               enterpriseId={enterpriseId}
               member={data}
               canAlter={perms.canAlterMembers}
-              departmentNameById={departmentNameById}
-            />
-          )}
-
-          {config.detail.showPermissions && (
-            <MemberPermissionsSection
-              enterpriseId={enterpriseId}
-              memberId={data.id}
-              departments={data.departments}
-              departmentNameById={departmentNameById}
-              canAlterPermissions={perms.canAlterPermissions}
             />
           )}
         </div>
