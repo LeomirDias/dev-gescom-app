@@ -123,7 +123,7 @@ export function MemberDetailPageContent({
 
   if (!ready || !perms.isReady) {
     return (
-      <main className="mx-auto flex w-full flex-col gap-6 p-4 md:p-8">
+      <main className="mx-auto w-full p-4 md:p-8">
         <MembershipDetailContentLoading config={config} />
       </main>
     )
@@ -131,7 +131,7 @@ export function MemberDetailPageContent({
 
   if (perms.isError) {
     return (
-      <main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-4 md:p-8">
+      <main className="mx-auto w-full max-w-lg space-y-6 p-4 md:p-8">
         <Card>
           <CardHeader>
             <CardTitle>Não foi possível carregar permissões</CardTitle>
@@ -147,7 +147,7 @@ export function MemberDetailPageContent({
 
   if (!memberId) {
     return (
-      <main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-4 md:p-8">
+      <main className="mx-auto w-full max-w-lg space-y-6 p-4 md:p-8">
         <Card>
           <CardHeader>
             <CardTitle>{config.labels.invalidId}</CardTitle>
@@ -161,7 +161,7 @@ export function MemberDetailPageContent({
 
   if (!perms.canConsultMembers) {
     return (
-      <main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-4 md:p-8">
+      <main className="mx-auto w-full max-w-lg space-y-6 p-4 md:p-8">
         <Card>
           <CardHeader>
             <CardTitle>Sem permissão</CardTitle>
@@ -177,7 +177,7 @@ export function MemberDetailPageContent({
   const displayName = data?.user.userName.trim() || undefined
 
   return (
-    <main className="mx-auto flex w-full flex-col gap-6 p-4 md:p-8">
+    <main className="mx-auto w-full space-y-6 p-4 md:p-8">
       <RouteBreadcrumb currentLabel={displayName} />
       {isPending && <MembershipDetailContentLoading config={config} />}
 

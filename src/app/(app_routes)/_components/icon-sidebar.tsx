@@ -29,7 +29,7 @@ export function IconSidebar({ activePanel, onPanelChange }: IconSidebarProps) {
   }
 
   return (
-    <aside className="flex h-svh w-[60px] shrink-0 flex-col border-r border-border bg-sidebar">
+    <aside className="flex h-full w-[60px] shrink-0 flex-col border-r border-border bg-sidebar">
       <div className="flex h-14 shrink-0 items-center justify-center border-b border-border">
         <Image
           src="/enterprise-icon.png"

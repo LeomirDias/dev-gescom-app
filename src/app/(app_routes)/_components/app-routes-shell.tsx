@@ -33,7 +33,10 @@ export function AppRoutesShell({ children }: { children: React.ReactNode }) {
 
   return (
     <PageRefreshProvider>
-      <div className="flex h-svh w-full overflow-hidden">
+      <div
+        data-app-shell
+        className="flex h-svh w-full overflow-hidden"
+      >
         <IconSidebar
           activePanel={activePanel}
           onPanelChange={setActivePanel}
@@ -46,7 +49,9 @@ export function AppRoutesShell({ children }: { children: React.ReactNode }) {
         ) : null}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background">
           <NavHeader />
-          <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+          <div className="h-0 min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+            {children}
+          </div>
         </div>
       </div>
     </PageRefreshProvider>

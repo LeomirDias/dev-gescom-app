@@ -43,7 +43,7 @@ export function SecondaryNavPanel({
 
   return (
     <aside
-      className="flex h-svh w-52 shrink-0 flex-col border-r border-border bg-sidebar"
+      className="flex h-full w-52 shrink-0 flex-col border-r border-border bg-sidebar"
       aria-label={`Menu ${group.label}`}
     >
       <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
