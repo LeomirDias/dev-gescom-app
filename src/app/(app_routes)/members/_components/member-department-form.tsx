@@ -193,9 +193,9 @@ export function MemberDepartmentForm({
             <Button
               type="submit"
               disabled={isPending || isCatalogBlocked}
-              tooltip="Guardar"
+              tooltip="Salvar"
             >
-              {isPending ? "A guardar..." : "Guardar"}
+              {isPending ? "Salvando..." : "Salvar"}
             </Button>
           </FieldGroup>
         </form>

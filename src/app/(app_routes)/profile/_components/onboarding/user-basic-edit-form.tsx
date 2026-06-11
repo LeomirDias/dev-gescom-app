@@ -173,7 +173,7 @@ export function UserBasicEditForm({
               <FieldDescription>Apenas digitos, 8 a 20 caracteres.</FieldDescription>
             </Field>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "A guardar..." : "Guardar"}
+              {mutation.isPending ? "Salvando..." : "Salvar"}
             </Button>
           </FieldGroup>
         </form>

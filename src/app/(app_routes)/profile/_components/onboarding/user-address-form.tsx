@@ -292,7 +292,7 @@ function UserAddressFormContent({
             </Select>
           </Field>
           <Button type="submit" disabled={isPending}>
-            {isPending ? "A guardar..." : "Guardar"}
+            {isPending ? "Salvando..." : "Salvar"}
           </Button>
         </FieldGroup>
       </form>

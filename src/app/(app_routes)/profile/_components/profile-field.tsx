@@ -206,9 +206,9 @@ export function ProfileEditActions({
         type="button"
         onClick={onSave}
         disabled={isPending}
-        tooltip="Guardar alterações"
+        tooltip="Salvar alterações"
       >
-        {isPending ? "A guardar..." : "Salvar"}
+        {isPending ? "Salvando..." : "Salvar"}
       </Button>
     </div>
   )

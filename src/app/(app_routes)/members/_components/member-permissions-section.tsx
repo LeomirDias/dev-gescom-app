@@ -234,7 +234,7 @@ function PermissionFormBlock({
               disabled={isPending}
               tooltip="Aplicar permissão"
             >
-              {isPending ? "A guardar..." : "Aplicar"}
+              {isPending ? "Salvando..." : "Salvar"}
             </Button>
             <Button
               type="button"
