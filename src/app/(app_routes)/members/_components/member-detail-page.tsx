@@ -297,6 +297,7 @@ export function MemberDetailPageContent({
               enterpriseId={enterpriseId}
               member={data}
               canAlter={perms.canAlterMembers}
+              canAlterPermissions={perms.canAlterPermissions}
             />
           )}
         </div>

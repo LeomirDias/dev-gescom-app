@@ -1,33 +1,53 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { Building2, Pencil, Plus, Trash2 } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { Building2, Plus } from "lucide-react"
 
+import { MemberDepartmentForm } from "@/app/(app_routes)/members/_components/member-department-form"
+import { MemberDepartmentPanel } from "@/app/(app_routes)/members/_components/member-department-panel"
+import { ConfirmSoftDeleteDialog } from "@/components/global/confirm-soft-delete-dialog"
+import {
+  SectionToggle,
+  SectionTogglePanel,
+  type SectionToggleOption,
+} from "@/components/global/section-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { HttpError } from "@/lib/api/http-error"
 import { useOperatorPermissions } from "@/lib/permissions"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
-import { ConfirmSoftDeleteDialog } from "@/components/global/confirm-soft-delete-dialog"
-import { MemberDepartmentForm } from "@/app/(app_routes)/members/_components/member-department-form"
-import { MemberStatusBadge } from "@/app/(app_routes)/members/_components/member-status-badge"
 import { useDepartmentsQuery } from "@/modules/departments/use-departments"
 import type { MemberDepartment, MemberDetail } from "@/modules/memberships/memberships.schema"
+import { mapMemberDepartmentPermissionEntries } from "@/modules/memberships/member-department-permissions"
 import { useUpdateMemberDepartmentMutation } from "@/modules/memberships/use-members"
+
+function resolveDepartmentName(
+  department: MemberDepartment,
+  departmentNameById: Map<string, string>
+) {
+  return (
+    department.name?.trim() ||
+    departmentNameById.get(department.departmentId) ||
+    department.departmentId
+  )
+}
 
 export function MemberDepartmentsSection({
   enterpriseId,
   member,
   canAlter,
+  canAlterPermissions,
 }: {
   enterpriseId: string
   member: MemberDetail
   canAlter: boolean
+  canAlterPermissions: boolean
 }) {
   const perms = useOperatorPermissions()
   const catalogQuery = useDepartmentsQuery(perms.canConsultDepartments)
@@ -39,11 +59,13 @@ export function MemberDepartmentsSection({
     }
     return map
   }, [catalogQuery.data])
+
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("")
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<MemberDepartment | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<MemberDepartment | null>(
     null
   )
+
   const deleteMutation = useUpdateMemberDepartmentMutation(
     enterpriseId,
     member.id
@@ -53,6 +75,48 @@ export function MemberDepartmentsSection({
     (d) => d.status === "ATIVO"
   )
   const existingIds = member.departments.map((d) => d.departmentId)
+
+  useEffect(() => {
+    if (activeDepartments.length === 0) {
+      setTimeout(() => {
+        setSelectedDepartmentId("")
+      }, 0)
+      return
+    }
+
+    if (
+      !activeDepartments.some(
+        (department) => department.id === selectedDepartmentId
+      )
+    ) {
+      setTimeout(() => {
+        setSelectedDepartmentId(activeDepartments[0]!.id)
+      }, 0)
+    }
+  }, [activeDepartments, selectedDepartmentId])
+
+  const effectiveSelectedId =
+    selectedDepartmentId || activeDepartments[0]?.id || ""
+
+  const toggleOptions: SectionToggleOption<string>[] = activeDepartments.map(
+    (department) => ({
+      id: department.id,
+      label: resolveDepartmentName(department, departmentNameById),
+    })
+  )
+
+  const selectedDepartment =
+    activeDepartments.find(
+      (department) => department.id === effectiveSelectedId
+    ) ?? activeDepartments[0]
+
+  const departmentPermissions = useMemo(
+    () =>
+      selectedDepartment
+        ? mapMemberDepartmentPermissionEntries(selectedDepartment)
+        : [],
+    [selectedDepartment]
+  )
 
   async function confirmDelete() {
     if (!deleteTarget) return
@@ -64,7 +128,7 @@ export function MemberDepartmentsSection({
       setDeleteTarget(null)
     } catch (error) {
       if (error instanceof HttpError) {
-        toastHttpError(error, "Nao foi possivel remover o departamento.")
+        toastHttpError(error, "Não foi possível remover o departamento.")
         return
       }
     }
@@ -73,21 +137,22 @@ export function MemberDepartmentsSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
+        <div className="space-y-1">
           <CardTitle className="flex items-center gap-2 text-md">
             <Building2 className="size-4 text-primary" aria-hidden />
-            Departamentos
+            Departamentos e permissões
           </CardTitle>
+          <CardDescription>
+            Vínculos departamentais e permissões por departamento. Use o switch
+            para ativar ou desativar cada permissão.
+          </CardDescription>
         </div>
         {canAlter && (
           <Button
             type="button"
             size="sm"
             variant="secondary"
-            onClick={() => {
-              setEditing(null)
-              setFormOpen(true)
-            }}
+            onClick={() => setFormOpen(true)}
             tooltip="Adicionar departamento"
           >
             <Plus className="size-4" aria-hidden />
@@ -95,61 +160,44 @@ export function MemberDepartmentsSection({
           </Button>
         )}
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {activeDepartments.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nenhum departamento ativo.
           </p>
         ) : (
-          activeDepartments.map((d) => {
-            const name =
-              departmentNameById.get(d.departmentId) ?? d.departmentId
-            return (
-              <div
-                key={d.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-3"
+          <>
+            {activeDepartments.length > 1 && (
+              <SectionToggle
+                value={effectiveSelectedId}
+                onValueChange={setSelectedDepartmentId}
+                options={toggleOptions}
+                ariaLabel="Departamentos do membro"
+                idPrefix="member-department"
+              />
+            )}
+
+            {selectedDepartment && (
+              <SectionTogglePanel
+                sectionId={selectedDepartment.id}
+                idPrefix="member-department"
               >
-                <div className="min-w-0">
-                  <p className="font-medium">{name}</p>
-                  {d.mainDepartment && (
-                    <span className="mt-1 inline-block text-xs font-medium text-primary">
-                      Principal
-                    </span>
+                <MemberDepartmentPanel
+                  department={selectedDepartment}
+                  departmentName={resolveDepartmentName(
+                    selectedDepartment,
+                    departmentNameById
                   )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <MemberStatusBadge status={d.status} />
-                  {canAlter && (
-                    <>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => {
-                          setEditing(d)
-                          setFormOpen(true)
-                        }}
-                        tooltip="Editar departamento"
-                        aria-label="Editar departamento"
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setDeleteTarget(d)}
-                        tooltip="Remover departamento"
-                        aria-label="Remover departamento"
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            )
-          })
+                  permissions={departmentPermissions}
+                  enterpriseId={enterpriseId}
+                  memberId={member.id}
+                  canAlter={canAlter}
+                  canAlterPermissions={canAlterPermissions}
+                  onDelete={() => setDeleteTarget(selectedDepartment)}
+                />
+              </SectionTogglePanel>
+            )}
+          </>
         )}
       </CardContent>
 
@@ -160,14 +208,13 @@ export function MemberDepartmentsSection({
           enterpriseId={enterpriseId}
           memberId={member.id}
           existingDepartmentIds={existingIds}
-          editing={editing}
-          departmentNameById={departmentNameById}
+          makeMainDepartment={activeDepartments.length === 0}
         />
       )}
 
       <ConfirmSoftDeleteDialog
         open={Boolean(deleteTarget)}
-        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Remover departamento?"
         description="O vínculo com este departamento será inativado."
         confirmLabel="Remover"

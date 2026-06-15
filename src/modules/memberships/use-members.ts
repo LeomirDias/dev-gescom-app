@@ -119,9 +119,9 @@ export function useUpdateMemberMutation(
     onSuccess: (_, variables) => {
       invalidate()
       if (variables.softDelete) {
-        toast.success("Membro inactivado.")
+        toast.success("Membro inativado.")
       } else {
-        toast.success("Membro actualizado.")
+        toast.success("Membro atualizado.")
       }
     },
   })
@@ -176,7 +176,8 @@ export function useUpdateMemberPermissionDefaultMutation(
   enterpriseId: string,
   memberId: string
 ) {
-  const invalidate = useInvalidateMembers(enterpriseId, memberId)
+  const invalidateMembers = useInvalidateMembers(enterpriseId, memberId)
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
       departmentId,
@@ -192,11 +193,14 @@ export function useUpdateMemberPermissionDefaultMutation(
         input
       ),
     onSuccess: (_, variables) => {
-      invalidate()
+      invalidateMembers()
+      void queryClient.invalidateQueries({ queryKey: ["account", "me"] })
       if (variables.input.softDelete) {
-        toast.success("Permissao padrao removida.")
+        toast.success("Permissão padrão removida.")
+      } else if (variables.input.status === "ALLOW") {
+        toast.success("Permissão ativada.")
       } else {
-        toast.success("Permissao padrao actualizada.")
+        toast.success("Permissão bloqueada.")
       }
     },
   })
@@ -206,7 +210,8 @@ export function useUpdateMemberExtraPermissionMutation(
   enterpriseId: string,
   memberId: string
 ) {
-  const invalidate = useInvalidateMembers(enterpriseId, memberId)
+  const invalidateMembers = useInvalidateMembers(enterpriseId, memberId)
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
       departmentId,
@@ -222,11 +227,14 @@ export function useUpdateMemberExtraPermissionMutation(
         input
       ),
     onSuccess: (_, variables) => {
-      invalidate()
+      invalidateMembers()
+      void queryClient.invalidateQueries({ queryKey: ["account", "me"] })
       if (variables.input.softDelete) {
-        toast.success("Permissao extra removida.")
+        toast.success("Permissão extra removida.")
+      } else if (variables.input.status === "ALLOW") {
+        toast.success("Permissão ativada.")
       } else {
-        toast.success("Permissao extra actualizada.")
+        toast.success("Permissão bloqueada.")
       }
     },
   })

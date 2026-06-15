@@ -1,40 +1,89 @@
 "use client"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Loader2 } from "lucide-react"
+
+import { Switch } from "@/components/ui/switch"
 import { formatPermissionLabel } from "@/lib/permission-label"
 import { cn } from "@/lib/utils"
 
 type EnterprisePermissionBadgeProps = {
   permission: string
+  active: boolean
+  disabled?: boolean
+  pending?: boolean
+  onCheckedChange?: (checked: boolean) => void
   className?: string
 }
 
 export function EnterprisePermissionBadge({
   permission,
+  active,
+  disabled = false,
+  pending = false,
+  onCheckedChange,
   className,
 }: EnterprisePermissionBadgeProps) {
   const label = formatPermissionLabel(permission)
+  const readOnly = !onCheckedChange
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild className="block w-full min-w-0">
-        <span
-          tabIndex={0}
+    <div
+      className={cn(
+        "flex min-h-11 items-center justify-between gap-3 rounded-md border px-3 py-2 transition-[background-color,border-color,opacity,box-shadow]",
+        active
+          ? "border-emerald-500/45 bg-emerald-500/10 shadow-xs dark:border-emerald-400/40 dark:bg-emerald-500/15"
+          : "border-red-500/35 bg-red-500/8 dark:border-red-400/35 dark:bg-red-500/12",
+        pending && "opacity-70",
+        readOnly && "cursor-default",
+        className
+      )}
+    >
+      <div className="flex items-center justify-center gap-2">
+        <p
           className={cn(
-            "flex h-9 w-full min-w-0 items-center justify-center rounded-md border border-primary/20 bg-linear-to-r from-primary/10 to-primary/5 px-3 text-xs font-medium text-foreground shadow-xs outline-none transition-[background-color,box-shadow] hover:border-primary/30 hover:from-primary/15 hover:to-primary/8 focus-visible:ring-2 focus-visible:ring-primary/40",
-            className
+            "truncate text-xs font-medium",
+            active
+              ? "text-emerald-950 dark:text-emerald-50"
+              : "text-red-950/85 dark:text-red-100/90"
           )}
         >
-          <span className="truncate text-center">{label}</span>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="font-mono text-xs">
-        {permission}
-      </TooltipContent>
-    </Tooltip>
+          {label}
+        </p>
+        {/* <p
+              className={cn(
+                "text-xs font-light uppercase",
+                active
+                  ? "text-emerald-700 dark:text-emerald-300"
+                  : "text-red-700 dark:text-red-300"
+              )}
+            >
+              {active ? "Ativa" : "Inativa"}
+            </p> */}
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        {pending && (
+          <Loader2
+            className={cn(
+              "size-3.5 animate-spin",
+              active ? "text-emerald-600" : "text-red-600"
+            )}
+            aria-hidden
+          />
+        )}
+        <Switch
+          checked={active}
+          disabled={disabled || pending || readOnly}
+          onCheckedChange={onCheckedChange}
+          size="sm"
+          aria-label={`${active ? "Desativar" : "Ativar"} ${label}`}
+          className={cn(
+            active
+              ? "data-checked:bg-emerald-600 dark:data-checked:bg-emerald-500"
+              : "data-unchecked:bg-red-400/80 dark:data-unchecked:bg-red-500/70"
+          )}
+        />
+      </div>
+    </div>
   )
 }

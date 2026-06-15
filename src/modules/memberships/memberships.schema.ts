@@ -85,14 +85,30 @@ export const listMembersResponseSchema = z.object({
 
 export type ListMembersResponse = z.infer<typeof listMembersResponseSchema>
 
-/** Departamento no detalhe do membro (`GET /:memberId`) — a API não envia `memberId`. */
+/** Departamento no detalhe do membro (`GET /:memberId`). */
+export const memberDepartmentPermissionItemSchema = z.object({
+  id: z.uuid(),
+  permission: z.string(),
+  status: permissionStatusSchema,
+})
+
+export type MemberDepartmentPermissionItem = z.infer<
+  typeof memberDepartmentPermissionItemSchema
+>
+
 export const memberDepartmentInDetailSchema = z.object({
   id: z.uuid(),
   departmentId: z.uuid(),
+  name: z.string().optional(),
   mainDepartment: z.boolean(),
   status: memberStatusSchema,
   createdAt: z.string(),
   updatedAt: z.string().nullable().optional(),
+  permissionsDefault: z
+    .array(memberDepartmentPermissionItemSchema)
+    .default([]),
+  extraPermissions: z.array(memberDepartmentPermissionItemSchema).default([]),
+  permissions: z.array(z.string()).default([]),
 })
 
 export type MemberDepartment = z.infer<typeof memberDepartmentInDetailSchema>
@@ -229,7 +245,7 @@ export const memberPermissionSchema = z.object({
   id: z.uuid(),
   permission: z.string(),
   status: permissionStatusSchema,
-  memberDepartmentId: z.uuid(),
+  memberDepartmentId: z.uuid().optional(),
   updatedAt: z.string().nullable().optional(),
 })
 

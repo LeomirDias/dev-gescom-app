@@ -22,11 +22,7 @@ import { HttpError } from "@/lib/api/http-error"
 import { useOperatorPermissions } from "@/lib/permissions"
 import { toastHttpError } from "@/modules/authentication/http-error-feedback"
 import { useDepartmentsQuery } from "@/modules/departments/use-departments"
-import type { MemberDepartment } from "@/modules/memberships/memberships.schema"
-import {
-  useAddMemberDepartmentMutation,
-  useUpdateMemberDepartmentMutation,
-} from "@/modules/memberships/use-members"
+import { useAddMemberDepartmentMutation } from "@/modules/memberships/use-members"
 
 type MemberDepartmentFormProps = {
   open: boolean
@@ -34,8 +30,7 @@ type MemberDepartmentFormProps = {
   enterpriseId: string
   memberId: string
   existingDepartmentIds: string[]
-  departmentNameById: Map<string, string>
-  editing?: MemberDepartment | null
+  makeMainDepartment: boolean
 }
 
 export function MemberDepartmentForm({
@@ -44,27 +39,18 @@ export function MemberDepartmentForm({
   enterpriseId,
   memberId,
   existingDepartmentIds,
-  departmentNameById,
-  editing = null,
+  makeMainDepartment,
 }: MemberDepartmentFormProps) {
   const addMutation = useAddMemberDepartmentMutation(enterpriseId, memberId)
-  const updateMutation = useUpdateMemberDepartmentMutation(
-    enterpriseId,
-    memberId
-  )
   const perms = useOperatorPermissions()
-  const catalogQuery = useDepartmentsQuery(
-    open && !editing && perms.canConsultDepartments
-  )
+  const catalogQuery = useDepartmentsQuery(open && perms.canConsultDepartments)
 
   const [departmentId, setDepartmentId] = useState("")
-  const [mainDepartment, setMainDepartment] = useState(false)
 
   useEffect(() => {
     if (!open) return
-    setDepartmentId(editing?.departmentId ?? "")
-    setMainDepartment(editing?.mainDepartment ?? false)
-  }, [open, editing])
+    setDepartmentId("")
+  }, [open])
 
   const catalogOptions =
     catalogQuery.data?.map((d) => ({
@@ -76,128 +62,88 @@ export function MemberDepartmentForm({
     (o) => !existingDepartmentIds.includes(o.departmentId)
   )
 
-  const editingDepartmentName = editing
-    ? (departmentNameById.get(editing.departmentId) ?? editing.departmentId)
-    : ""
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!editing && (catalogQuery.isPending || catalogQuery.error)) {
+    if (catalogQuery.isPending || catalogQuery.error) {
       toast.error("Não foi possível carregar o catálogo de departamentos.")
       return
     }
-    if (!departmentId && !editing) {
+    if (!departmentId) {
       toast.error("Selecione um departamento.")
       return
     }
 
     try {
-      if (editing) {
-        await updateMutation.mutateAsync({
-          memberDepartmentId: editing.id,
-          input: {
-            departmentId: departmentId || editing.departmentId,
-            mainDepartment,
-          },
-        })
-      } else {
-        await addMutation.mutateAsync({
-          departmentId,
-          mainDepartment,
-        })
-      }
+      await addMutation.mutateAsync({
+        departmentId,
+        mainDepartment: makeMainDepartment,
+      })
       onOpenChange(false)
     } catch (error) {
       if (error instanceof HttpError) {
-        toastHttpError(
-          error,
-          editing
-            ? "Não foi possível atualizar o departamento."
-            : "Não foi possível adicionar o departamento."
-        )
+        toastHttpError(error, "Não foi possível adicionar o departamento.")
         return
       }
       toast.error("Operação falhou.")
     }
   }
 
-  const isPending = addMutation.isPending || updateMutation.isPending
+  const isPending = addMutation.isPending
   const isCatalogBlocked =
-    !editing &&
-    (!perms.canConsultDepartments ||
-      catalogQuery.isPending ||
-      !!catalogQuery.error)
+    !perms.canConsultDepartments ||
+    catalogQuery.isPending ||
+    !!catalogQuery.error
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>
-            {editing ? "Editar departamento" : "Adicionar departamento"}
-          </SheetTitle>
+          <SheetTitle>Adicionar departamento</SheetTitle>
           <SheetDescription>
-            {editing
-              ? "Altere se este departamento é o principal do membro."
-              : "Vincule o membro a um departamento da empresa."}
+            Vincule o membro a um departamento da empresa.
+            {makeMainDepartment
+              ? " Será definido como departamento principal."
+              : " O departamento principal não pode ser alterado após a criação."}
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="mt-6">
           <FieldGroup>
-            {!editing && (
-              <Field>
-                <FieldLabel>Departamento</FieldLabel>
-                <Select
-                  value={departmentId}
-                  onValueChange={setDepartmentId}
-                  disabled={isCatalogBlocked || isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue
-                      placeholder={
-                        catalogQuery.isPending
-                          ? "A carregar..."
-                          : catalogQuery.error
-                            ? "Falha ao carregar"
-                            : "Selecione..."
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {available.map((o) => (
-                      <SelectItem key={o.departmentId} value={o.departmentId}>
-                        {o.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {!perms.canConsultDepartments && (
-                  <p className="mt-1 text-xs text-destructive">
-                    Sem permissão para consultar departamentos.
-                  </p>
-                )}
-                {perms.canConsultDepartments && catalogQuery.error && (
-                  <p className="mt-1 text-xs text-destructive">
-                    Não foi possível carregar o catálogo de departamentos.
-                  </p>
-                )}
-              </Field>
-            )}
-            {editing && (
-              <Field>
-                <FieldLabel>Departamento</FieldLabel>
-                <p className="text-sm font-medium">{editingDepartmentName}</p>
-              </Field>
-            )}
             <Field>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={mainDepartment}
-                  onChange={(e) => setMainDepartment(e.target.checked)}
-                  disabled={isPending}
-                />
-                Departamento principal
-              </label>
+              <FieldLabel>Departamento</FieldLabel>
+              <Select
+                value={departmentId}
+                onValueChange={setDepartmentId}
+                disabled={isCatalogBlocked || isPending}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      catalogQuery.isPending
+                        ? "A carregar..."
+                        : catalogQuery.error
+                          ? "Falha ao carregar"
+                          : "Selecione..."
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {available.map((o) => (
+                    <SelectItem key={o.departmentId} value={o.departmentId}>
+                      {o.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!perms.canConsultDepartments && (
+                <p className="mt-1 text-xs text-destructive">
+                  Sem permissão para consultar departamentos.
+                </p>
+              )}
+              {perms.canConsultDepartments && catalogQuery.error && (
+                <p className="mt-1 text-xs text-destructive">
+                  Não foi possível carregar o catálogo de departamentos.
+                </p>
+              )}
             </Field>
             <Button
               type="submit"

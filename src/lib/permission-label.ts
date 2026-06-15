@@ -3,15 +3,44 @@ const PERMISSION_LABEL_OVERRIDES: Record<string, string> = {}
 
 const PORTUGUESE_CONNECTORS = new Set(["de", "da", "do", "das", "dos", "e"])
 
+/** Termos que não devem passar por singularização (siglas e excepções). */
+const IMMUTABLE_WORDS = new Set([
+  "anp",
+  "cest",
+  "cofins",
+  "icms",
+  "max",
+  "min",
+  "ncm",
+  "nbs",
+  "pis",
+])
+
 function singularizePortugueseWord(word: string): string {
   const lower = word.toLowerCase()
+
+  if (IMMUTABLE_WORDS.has(lower) || lower.length <= 3) {
+    return lower
+  }
 
   if (lower.endsWith("oes")) return `${lower.slice(0, -3)}ao`
   if (lower.endsWith("aes")) return `${lower.slice(0, -3)}ao`
   if (lower.endsWith("ais")) return `${lower.slice(0, -3)}al`
+  if (lower.endsWith("eis")) return `${lower.slice(0, -3)}el`
+  if (lower.endsWith("ns") && lower.length > 4) return `${lower.slice(0, -2)}m`
+  if (lower.endsWith("os") && lower.length > 4) return lower.slice(0, -1)
+  if (lower.endsWith("as") && lower.length > 4) return lower.slice(0, -1)
+
+  if (lower.endsWith("es") && lower.length > 4) {
+    if (lower.endsWith("ores")) return lower.slice(0, -2)
+    const minusS = lower.slice(0, -1)
+    if (minusS.endsWith("e") && !minusS.endsWith("re")) return minusS
+    return lower.slice(0, -2)
+  }
+
   if (lower.endsWith("res") && lower.length > 5) return lower.slice(0, -2)
-  if (lower.endsWith("es") && lower.length > 4) return lower.slice(0, -2)
-  if (lower.endsWith("s") && lower.length > 3 && !lower.endsWith("ss")) {
+
+  if (lower.endsWith("s") && !lower.endsWith("ss")) {
     return lower.slice(0, -1)
   }
 
@@ -20,7 +49,9 @@ function singularizePortugueseWord(word: string): string {
 
 function normalizePermissionWord(word: string): string {
   const lower = word.toLowerCase()
-  if (PORTUGUESE_CONNECTORS.has(lower)) return lower
+  if (PORTUGUESE_CONNECTORS.has(lower) || IMMUTABLE_WORDS.has(lower)) {
+    return lower
+  }
   return singularizePortugueseWord(word)
 }
 
