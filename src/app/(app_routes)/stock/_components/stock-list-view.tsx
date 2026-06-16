@@ -19,7 +19,7 @@ import {
   PaginatedResourceTable,
   type ResourceColumn,
 } from "@/app/(app_routes)/products/_components/paginated-resource-table"
-import { ProductsContentLoading } from "@/app/(app_routes)/products/_components/products-route-loading"
+import { StockContentLoading } from "@/app/(app_routes)/stock/_components/stock-route-loading"
 import { RouteBreadcrumb } from "@/components/global/route-breadcrumb"
 import { useRequireEnterprise } from "@/hooks/use-require-enterprise"
 import { useOperatorPermissions } from "@/lib/permissions"
@@ -27,8 +27,8 @@ import type { PaginationQuery } from "@/modules/stock/stock.schema"
 
 type ListHookResult<T> = {
   data:
-    | { items: T[]; total: number; limit: number; offset: number }
-    | undefined
+  | { items: T[]; total: number; limit: number; offset: number }
+  | undefined
   error: unknown
   isPending: boolean
   isFetching: boolean
@@ -96,7 +96,7 @@ export function StockListView<T extends { id: string }>({
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout loading={<ProductsContentLoading />}>{null}</PaginatedListLayout>
+      <PaginatedListLayout loading={<StockContentLoading />}>{null}</PaginatedListLayout>
     )
   }
 
@@ -106,7 +106,7 @@ export function StockListView<T extends { id: string }>({
   }
 
   return (
-    <PaginatedListLayout loading={isPending ? <ProductsContentLoading /> : null}>
+    <PaginatedListLayout loading={isPending ? <StockContentLoading /> : null}>
       {Boolean(error) && data && <StaleDataBanner message={errMessage} />}
       {Boolean(error) && !data && !isPending && (
         <ListErrorCard
@@ -147,8 +147,6 @@ export function StockListView<T extends { id: string }>({
             offset={tableOffset}
             onPageChange={setPageOffset}
             onLimitChange={setLimit}
-            basePath={config.basePath}
-            showDetailLink
             emptyTitle="Nenhum registro encontrado"
             emptyDescription="Não há itens de estoque para exibir."
             columns={columns}
