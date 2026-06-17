@@ -1,14 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { LayoutGrid } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 
 import { useRegisterPageRefresh } from "@/app/(app_routes)/_components/page-refresh"
-import { ProductsFilters } from "@/app/(app_routes)/products/_components/products-filters"
-import { ProductsFiltersInline } from "@/app/(app_routes)/products/_components/products-filters-inline"
-import type { ProductsInlineSearchField } from "@/app/(app_routes)/products/_components/products-constants"
+import { ProductsFilters } from "@/components/global/search/search-form"
 import { ProductsListHeader } from "@/app/(app_routes)/products/_components/products-list-header"
-import { Button } from "@/components/ui/button"
 import { ProductsSearchResults } from "@/app/(app_routes)/products/_components/products-search-results"
 import { ProductsContentLoading } from "@/app/(app_routes)/products/_components/products-route-loading"
 import {
@@ -29,14 +25,10 @@ type ProductsListPageProps = {
   config: ProductsListRouteConfig
 }
 
-type ProductsFilterLayout = "advanced" | "inline"
-
 export function ProductsListPage({ config }: ProductsListPageProps) {
   const { ready } = useRequireEnterprise()
   const perms = useOperatorPermissions()
   const isExplicitSearch = useRef(false)
-  const [filterLayout, setFilterLayout] =
-    useState<ProductsFilterLayout>("advanced")
 
   const {
     draftFilters,
@@ -49,7 +41,6 @@ export function ProductsListPage({ config }: ProductsListPageProps) {
     hasSearched,
     isClientPagination,
     applySearch,
-    applyFieldSearch,
     handleSearchResult,
     clearFilters,
     setPageOffset,
@@ -116,21 +107,6 @@ export function ProductsListPage({ config }: ProductsListPageProps) {
     if (ok) isExplicitSearch.current = true
   }
 
-  function handleSearchByField(
-    field: ProductsInlineSearchField,
-    value: string
-  ) {
-    const ok = applyFieldSearch(field, value)
-    if (ok) isExplicitSearch.current = true
-  }
-
-  function toggleFilterLayout() {
-    clearFilters()
-    setFilterLayout((current) =>
-      current === "advanced" ? "inline" : "advanced"
-    )
-  }
-
   const handleRefresh = useCallback(() => {
     if (!hasSearched) return
     void refetch()
@@ -171,47 +147,16 @@ export function ProductsListPage({ config }: ProductsListPageProps) {
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6 p-4 md:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <ProductsListHeader config={config} />
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={toggleFilterLayout}
-          className="shrink-0"
-          tooltip="Alternar layout dos filtros (temporário para testes)"
-        >
-          <LayoutGrid className="size-4" aria-hidden />
-          Layout: {filterLayout === "advanced" ? "Avançado" : "Por campo"}
-        </Button>
-      </div>
-
-      <form
-        id={config.list.filtersFormId}
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (filterLayout === "advanced") handleSearch()
-        }}
-      >
-        {filterLayout === "advanced" ? (
-          <ProductsFilters
-            draftFilters={draftFilters}
-            dateFilters={draftDateFilters}
-            activeFilterCount={activeFilterCount}
-            onDraftFiltersChange={setDraftFilters}
-            onDateFiltersChange={setDraftDateFilters}
-            onSearch={handleSearch}
-            isSearching={isSearching}
-          />
-        ) : (
-          <ProductsFiltersInline
-            onSearchByField={handleSearchByField}
-            isSearching={isSearching}
-          />
-        )}
-      </form>
-
+      <ProductsListHeader config={config} />
+      <ProductsFilters
+        draftFilters={draftFilters}
+        dateFilters={draftDateFilters}
+        activeFilterCount={activeFilterCount}
+        onDraftFiltersChange={setDraftFilters}
+        onDateFiltersChange={setDraftDateFilters}
+        onSearch={handleSearch}
+        isSearching={isSearching}
+      />
       {showStaleBanner && <StaleDataBanner message={errMessage} />}
 
       <ProductsSearchResults
