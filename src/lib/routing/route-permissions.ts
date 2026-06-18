@@ -1,4 +1,4 @@
-import type { OperatorPermissions } from "@/components/guards/permission-route-guard"
+import type { OperatorPermissions } from "@/components/global/guards/permission-route-guard"
 import { PERMISSION_CODES } from "@/lib/permissions"
 
 type RoutePermissionRule = {
