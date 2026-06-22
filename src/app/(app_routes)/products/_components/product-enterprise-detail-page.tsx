@@ -7,13 +7,12 @@ import { z } from "zod"
 import { useRegisterPageRefresh } from "@/app/(app_routes)/_components/page-refresh"
 import {
   ProductApplicationsSection,
-  ProductDetailHeader,
-  ProductEnterpriseDetailsCard,
+  ProductEnterpriseFieldCards,
+  ProductEnterpriseRegistrationCard,
   ProductPriceSection,
   ProductPromotionalPricesSection,
   ProductTaxationSection,
 } from "@/app/(app_routes)/products/_components/product-enterprise-field"
-import { ProductDetailContentLoading } from "@/app/(app_routes)/products/_components/products-route-loading"
 import {
   ListErrorCard,
   PaginatedListLayout,
@@ -21,8 +20,8 @@ import {
   PermissionsErrorCard,
   StaleDataBanner,
   useListErrorState,
-} from "@/app/(app_routes)/products/_components/paginated-list-shell"
-import { RouteBreadcrumb } from "@/components/global/route-breadcrumb"
+} from "@/components/global/listing/paginated-list-shell"
+import { RouteBreadcrumb } from "@/components/global/navigation/route-breadcrumb"
 import {
   Card,
   CardDescription,
@@ -121,7 +120,7 @@ export function ProductEnterpriseDetailPage() {
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout loading={<ProductDetailContentLoading />}>
+      <PaginatedListLayout isReady={false}>
         {null}
       </PaginatedListLayout>
     )
@@ -135,7 +134,7 @@ export function ProductEnterpriseDetailPage() {
 
   if (!productEnterpriseId) {
     return (
-      <PaginatedListLayout loading={null}>
+      <PaginatedListLayout isReady={false}>
         <RouteBreadcrumb />
         <Card className="max-w-lg">
           <CardHeader>
@@ -150,9 +149,7 @@ export function ProductEnterpriseDetailPage() {
   const displayLabel = product?.description
 
   return (
-    <PaginatedListLayout
-      loading={isPending ? <ProductDetailContentLoading /> : null}
-    >
+    <PaginatedListLayout>
       <RouteBreadcrumb currentLabel={displayLabel} />
 
       {Boolean(error) && product && (
@@ -172,10 +169,10 @@ export function ProductEnterpriseDetailPage() {
 
       {product && !isPending && (
         <div className="space-y-6">
-          <ProductDetailHeader product={product} />
+          <ProductEnterpriseRegistrationCard product={product} />
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <ProductEnterpriseDetailsCard product={product} />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <ProductEnterpriseFieldCards product={product} />
             <ProductPriceSection
               price={price}
               canConsult={perms.canConsultPrices}

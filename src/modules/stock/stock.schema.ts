@@ -25,7 +25,7 @@ export type StockSector = z.infer<typeof stockSectorSchema>
 
 export const stockLocationSchema = z.object({
   id: z.uuid(),
-  code: z.string(),
+  code: z.coerce.string(),
   description: z.string().nullable(),
   stockSectorId: z.uuid(),
   status: enterpriseStatusSchema,

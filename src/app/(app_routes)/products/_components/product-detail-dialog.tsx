@@ -4,7 +4,6 @@ import {
   ProductDetailView,
   useProductPriceForEnterprise,
 } from "@/app/(app_routes)/products/_components/product-detail-view"
-import { ProductDetailContentLoading } from "@/app/(app_routes)/products/_components/products-route-loading"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -30,6 +29,7 @@ import {
 } from "@/modules/products/use-products"
 import { Pencil } from "lucide-react"
 import Link from "next/link"
+import { AnimatedLoading } from "@/components/global/loading/animated-loading"
 
 type ProductDetailDialogProps = {
   productEnterpriseId: string
@@ -85,7 +85,7 @@ export function ProductDetailDialog({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          {isPending && <ProductDetailContentLoading compact />}
+          {isPending && <AnimatedLoading />}
 
           {error && !isPending && (
             <Card className="border-destructive/40">

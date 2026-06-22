@@ -107,9 +107,7 @@ export default function HomePage() {
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout loading={<SalesDashboardLoading />}>
-        {null}
-      </PaginatedListLayout>
+      <PaginatedListLayout isReady={false}>{null}</PaginatedListLayout>
     )
   }
 
@@ -120,9 +118,10 @@ export default function HomePage() {
   }
 
   return (
-    <PaginatedListLayout
-      loading={isInitialLoading ? <SalesDashboardLoading /> : null}
-    >
+    <PaginatedListLayout>
+      {isInitialLoading ? (
+        <SalesDashboardLoading />
+      ) : (
       <div className="space-y-6">
         <HomeWelcomeCard />
 
@@ -170,6 +169,7 @@ export default function HomePage() {
           </>
         )}
       </div>
+      )}
     </PaginatedListLayout>
   )
 }

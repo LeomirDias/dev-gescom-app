@@ -34,22 +34,6 @@ function parseCode(value: string): number | undefined {
   return parsed
 }
 
-function buildApiSearchTerm(draft: ProductsDraftFilters): string | undefined {
-  const description = draft.description.trim()
-  if (description.length > 0) return description
-
-  const barCode = draft.barCode.trim()
-  if (barCode.length > 0) return barCode
-
-  const manufacturer = draft.manufacturer.trim()
-  if (manufacturer.length > 0) return manufacturer
-
-  const code = draft.code.trim()
-  if (code.length > 0) return code
-
-  return undefined
-}
-
 function hasAnySearchCriteria(
   draft: ProductsDraftFilters,
   dateFilters: ProductsDateFilters
@@ -59,6 +43,12 @@ function hasAnySearchCriteria(
     draft.description.trim().length > 0 ||
     draft.barCode.trim().length > 0 ||
     draft.manufacturer.trim().length > 0 ||
+    draft.origin.trim().length > 0 ||
+    draft.group.trim().length > 0 ||
+    draft.subgroup.trim().length > 0 ||
+    draft.brand.trim().length > 0 ||
+    draft.application.trim().length > 0 ||
+    draft.locacao.trim().length > 0 ||
     draft.status !== undefined ||
     draft.controlsBatch !== undefined ||
     Boolean(dateFilters.dateFrom?.trim()) ||
@@ -77,6 +67,12 @@ function countActiveFilters(
   if (draft.status) count++
   if (draft.controlsBatch !== undefined) count++
   if (draft.manufacturer.trim()) count++
+  if (draft.origin.trim()) count++
+  if (draft.group.trim()) count++
+  if (draft.subgroup.trim()) count++
+  if (draft.brand.trim()) count++
+  if (draft.application.trim()) count++
+  if (draft.locacao.trim()) count++
   if (dateFilters.dateFrom?.trim()) count++
   if (dateFilters.dateTo?.trim()) count++
   return count
@@ -87,20 +83,14 @@ function buildApiFilters(
   dateFilters: ProductsDateFilters,
   defaults: ListProductsEnterprisesQuery
 ) {
-  const search = buildApiSearchTerm(draft)
   const code = parseCode(draft.code)
-  const barCode = draft.barCode.trim() || undefined
-  const manufacturer = draft.manufacturer.trim() || undefined
   const dateFrom = dateFilters.dateFrom?.trim() || undefined
   const dateTo = dateFilters.dateTo?.trim() || undefined
   const needsClientFetch =
     draft.controlsBatch !== undefined ||
     Boolean(dateFrom) ||
     Boolean(dateTo) ||
-    Boolean(barCode) ||
-    Boolean(manufacturer) ||
-    Boolean(draft.description.trim()) ||
-    Boolean(draft.code.trim())
+    Boolean(draft.locacao.trim())
 
   return {
     filters: {
@@ -109,11 +99,16 @@ function buildApiFilters(
         ? PRODUCTS_CLIENT_SEARCH_LIMIT
         : (defaults.limit ?? 50),
       offset: 0,
-      search,
+      description: draft.description.trim() || undefined,
       status: draft.status,
       code,
-      barCode,
-      manufacturer,
+      barCode: draft.barCode.trim() || undefined,
+      manufacturer: draft.manufacturer.trim() || undefined,
+      origin: draft.origin.trim() || undefined,
+      group: draft.group.trim() || undefined,
+      subgroup: draft.subgroup.trim() || undefined,
+      brand: draft.brand.trim() || undefined,
+      application: draft.application.trim() || undefined,
       controlsBatch: draft.controlsBatch,
       dateFrom,
       dateTo,
@@ -137,7 +132,9 @@ export function useProductsListFilters(config: ProductsListRouteConfig) {
     useState<ListProductsEnterprisesQuery>(defaults)
   const [appliedClientCriteria, setAppliedClientCriteria] =
     useState<ProductsClientFilterCriteria>({
-      ...defaultProductsDraftFilters(),
+      status: undefined,
+      controlsBatch: undefined,
+      locacao: undefined,
       dateFilters: defaultProductsDateFilters(),
     })
   const [hasSearched, setHasSearched] = useState(false)
@@ -160,12 +157,9 @@ export function useProductsListFilters(config: ProductsListRouteConfig) {
       setAppliedFilters(next)
       setIsClientPagination(usesClientPagination)
       setAppliedClientCriteria({
-        code: draft.code,
-        description: draft.description,
-        barCode: draft.barCode,
         status: draft.status,
         controlsBatch: draft.controlsBatch,
-        manufacturer: draft.manufacturer,
+        locacao: draft.locacao.trim() || undefined,
         dateFilters: { ...dateFilters },
       })
       setHasSearched(true)
@@ -221,7 +215,9 @@ export function useProductsListFilters(config: ProductsListRouteConfig) {
     setAppliedFilters(reset)
     setIsClientPagination(false)
     setAppliedClientCriteria({
-      ...defaultProductsDraftFilters(),
+      status: undefined,
+      controlsBatch: undefined,
+      locacao: undefined,
       dateFilters: defaultProductsDateFilters(),
     })
     setHasSearched(false)

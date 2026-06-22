@@ -14,6 +14,7 @@ export type SearchFormField = {
     onChange: (value: string) => void
     placeholder?: string
     ariaLabel?: string
+    inputMode?: "text" | "numeric"
 }
 
 type SearchFormProps = {
@@ -61,6 +62,7 @@ export function SearchForm({
                                 placeholder={field.placeholder}
                                 disabled={isSearching}
                                 aria-label={field.ariaLabel ?? field.label}
+                                inputMode={field.inputMode}
                             />
                         </Field>
                     ))}

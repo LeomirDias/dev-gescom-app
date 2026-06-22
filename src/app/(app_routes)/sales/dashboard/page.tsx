@@ -218,9 +218,7 @@ export default function SalesDashboardPage() {
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout loading={<SalesDashboardLoading />}>
-        {null}
-      </PaginatedListLayout>
+      <PaginatedListLayout isReady={false}>{null}</PaginatedListLayout>
     )
   }
 
@@ -231,9 +229,10 @@ export default function SalesDashboardPage() {
   }
 
   return (
-    <PaginatedListLayout
-      loading={isInitialLoading ? <SalesDashboardLoading /> : null}
-    >
+    <PaginatedListLayout>
+      {isInitialLoading ? (
+        <SalesDashboardLoading />
+      ) : (
       <div className="space-y-6">
         <RouteBreadcrumb currentLabel="Relatórios de Vendas" />
         <div>
@@ -340,6 +339,7 @@ export default function SalesDashboardPage() {
           </>
         )}
       </div>
+      )}
     </PaginatedListLayout>
   )
 }

@@ -1,5 +1,5 @@
-import { ProductsRouteLoading } from "@/app/(app_routes)/products/_components/products-route-loading"
+import { AnimatedLoading } from "@/components/global/loading/animated-loading"
 
-export default function ProductsLoading() {
-  return <ProductsRouteLoading />
+export default function ProductsRouteLoading() {
+  return <AnimatedLoading />
 }

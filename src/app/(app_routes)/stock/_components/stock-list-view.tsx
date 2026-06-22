@@ -8,6 +8,10 @@ import {
   type StockResourceConfig,
 } from "@/app/(app_routes)/stock/_components/stock-config"
 import {
+  StockTableRows,
+  type StockColumn,
+} from "@/app/(app_routes)/stock/_components/stock-table-rows"
+import {
   PaginatedListLayout,
   ListErrorCard,
   PermissionDeniedCard,
@@ -15,10 +19,7 @@ import {
   StaleDataBanner,
   useListErrorState,
 } from "@/components/global/listing/paginated-list-shell"
-import {
-  PaginatedResourceTable,
-  type ResourceColumn,
-} from "@/app/(app_routes)/products/_components/paginated-resource-table"
+import { TableListing } from "@/components/global/listing/table-listing"
 import { StockContentLoading } from "@/app/(app_routes)/stock/_components/stock-route-loading"
 import { RouteBreadcrumb } from "@/components/global/navigation/route-breadcrumb"
 import { useRequireEnterprise } from "@/hooks/use-require-enterprise"
@@ -37,7 +38,7 @@ type ListHookResult<T> = {
 
 type StockListViewProps<T extends { id: string }> = {
   config: StockResourceConfig
-  columns: ResourceColumn<T>[]
+  columns: StockColumn<T>[]
   mobileTitle: (item: T) => string
   mobileSubtitle?: (item: T) => string
   useListData: (opts: {
@@ -96,7 +97,7 @@ export function StockListView<T extends { id: string }>({
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout loading={<StockContentLoading />}>{null}</PaginatedListLayout>
+      <PaginatedListLayout isReady={false}>{null}</PaginatedListLayout>
     )
   }
 
@@ -106,7 +107,11 @@ export function StockListView<T extends { id: string }>({
   }
 
   return (
-    <PaginatedListLayout loading={isPending ? <StockContentLoading /> : null}>
+    <PaginatedListLayout>
+      {isPending ? (
+        <StockContentLoading />
+      ) : (
+        <>
       {Boolean(error) && data && <StaleDataBanner message={errMessage} />}
       {Boolean(error) && !data && !isPending && (
         <ListErrorCard
@@ -140,7 +145,7 @@ export function StockListView<T extends { id: string }>({
               : `Mostrando ${rangeStart}–${rangeEnd} de ${tableTotal} registros`}
           </p>
 
-          <PaginatedResourceTable
+          <TableListing
             items={data.items}
             total={tableTotal}
             limit={tableLimit}
@@ -148,13 +153,19 @@ export function StockListView<T extends { id: string }>({
             onPageChange={setPageOffset}
             onLimitChange={setLimit}
             emptyTitle="Nenhum registro encontrado"
-            emptyDescription="Não há itens de estoque para exibir."
-            columns={columns}
-            mobileTitle={mobileTitle}
-            mobileSubtitle={mobileSubtitle}
-            listLabel={`Lista de ${config.title.toLowerCase()}`}
-          />
+            emptyHint="Não há itens de estoque para exibir."
+          >
+            <StockTableRows
+              items={data.items}
+              columns={columns}
+              mobileTitle={mobileTitle}
+              mobileSubtitle={mobileSubtitle}
+              listLabel={`Lista de ${config.title.toLowerCase()}`}
+            />
+          </TableListing>
         </div>
+      )}
+        </>
       )}
     </PaginatedListLayout>
   )

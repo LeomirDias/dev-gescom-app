@@ -16,6 +16,12 @@ export type ProductsDraftFilters = {
   status?: ListProductsEnterprisesQuery["status"]
   controlsBatch?: boolean
   manufacturer: string
+  origin: string
+  group: string
+  subgroup: string
+  brand: string
+  application: string
+  locacao: string
 }
 
 export type ProductsInlineSearchField =
@@ -23,6 +29,7 @@ export type ProductsInlineSearchField =
   | "description"
   | "barCode"
   | "manufacturer"
+  | "origin"
 
 export function defaultProductsDateFilters(): ProductsDateFilters {
   return {}
@@ -36,6 +43,12 @@ export function defaultProductsDraftFilters(): ProductsDraftFilters {
     status: undefined,
     controlsBatch: undefined,
     manufacturer: "",
+    origin: "",
+    group: "",
+    subgroup: "",
+    brand: "",
+    application: "",
+    locacao: "",
   }
 }
 

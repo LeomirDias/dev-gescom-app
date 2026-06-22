@@ -12,9 +12,15 @@ import { paginationQuerySchema } from "@/lib/schemas/pagination"
 type FetchPaginatedQuery = PaginationQuery & {
   search?: string
   status?: string
+  description?: string
   code?: number
   barCode?: string
   manufacturer?: string
+  origin?: string
+  group?: string
+  subgroup?: string
+  brand?: string
+  application?: string
   controlsBatch?: boolean
   dateFrom?: string
   dateTo?: string
@@ -31,9 +37,15 @@ export async function fetchPaginated<T>(
     ...parsed,
     search: "search" in query ? query.search : undefined,
     status: "status" in query ? query.status : undefined,
+    description: "description" in query ? query.description : undefined,
     code: "code" in query ? query.code : undefined,
     barCode: "barCode" in query ? query.barCode : undefined,
     manufacturer: "manufacturer" in query ? query.manufacturer : undefined,
+    origin: "origin" in query ? query.origin : undefined,
+    group: "group" in query ? query.group : undefined,
+    subgroup: "subgroup" in query ? query.subgroup : undefined,
+    brand: "brand" in query ? query.brand : undefined,
+    application: "application" in query ? query.application : undefined,
     controlsBatch: "controlsBatch" in query ? query.controlsBatch : undefined,
     dateFrom: "dateFrom" in query ? query.dateFrom : undefined,
     dateTo: "dateTo" in query ? query.dateTo : undefined,

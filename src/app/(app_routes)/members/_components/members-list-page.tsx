@@ -124,11 +124,7 @@ export function MembersListPage({
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout
-        loading={<MembershipContentLoading config={config} />}
-      >
-        {null}
-      </PaginatedListLayout>
+      <PaginatedListLayout isReady={false}>{null}</PaginatedListLayout>
     )
   }
 
@@ -139,11 +135,11 @@ export function MembersListPage({
   }
 
   return (
-    <PaginatedListLayout
-      loading={
-        isPending ? <MembershipContentLoading config={config} /> : null
-      }
-    >
+    <PaginatedListLayout>
+      {isPending ? (
+        <MembershipContentLoading config={config} />
+      ) : (
+        <>
       {error && data && <StaleDataBanner message={errMessage} />}
       {error && !data && !isPending && (
         <ListErrorCard
@@ -204,6 +200,8 @@ export function MembersListPage({
             onClearFilters={clearFilters}
           />
         </div>
+      )}
+        </>
       )}
     </PaginatedListLayout>
   )

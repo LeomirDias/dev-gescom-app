@@ -132,11 +132,7 @@ export function SalesListPage({ config, leading }: SalesListPageProps) {
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout
-        loading={<SalesContentLoading config={config} />}
-      >
-        {null}
-      </PaginatedListLayout>
+      <PaginatedListLayout isReady={false}>{null}</PaginatedListLayout>
     )
   }
 
@@ -147,11 +143,11 @@ export function SalesListPage({ config, leading }: SalesListPageProps) {
   }
 
   return (
-    <PaginatedListLayout
-      loading={
-        isPending ? <SalesContentLoading config={config} /> : null
-      }
-    >
+    <PaginatedListLayout>
+      {isPending ? (
+        <SalesContentLoading config={config} />
+      ) : (
+        <>
       {leading}
       {error && data && <StaleDataBanner message={errMessage} />}
       {error && !data && !isPending && (
@@ -214,6 +210,8 @@ export function SalesListPage({ config, leading }: SalesListPageProps) {
             onClearFilters={clearFilters}
           />
         </div>
+      )}
+        </>
       )}
     </PaginatedListLayout>
   )

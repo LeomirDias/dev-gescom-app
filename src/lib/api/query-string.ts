@@ -3,9 +3,15 @@ import type { PaginationQuery } from "@/lib/schemas/pagination"
 type QueryParamsInput = PaginationQuery & {
   search?: string
   status?: string
+  description?: string
   code?: number
   barCode?: string
   manufacturer?: string
+  origin?: string
+  group?: string
+  subgroup?: string
+  brand?: string
+  application?: string
   controlsBatch?: boolean
   dateFrom?: string
   dateTo?: string
@@ -33,9 +39,15 @@ export function buildPaginationQuery(query: QueryParamsInput): string {
         ? query.search
         : undefined,
     status: query.status,
+    description: query.description,
     code: query.code,
     barCode: query.barCode,
     manufacturer: query.manufacturer,
+    origin: query.origin,
+    group: query.group,
+    subgroup: query.subgroup,
+    brand: query.brand,
+    application: query.application,
     controlsBatch: query.controlsBatch,
     dateFrom: query.dateFrom,
     dateTo: query.dateTo,

@@ -3,7 +3,8 @@
 import { useMemo } from "react"
 
 import {
-  ProductEnterpriseDetailsCard,
+  ProductEnterpriseFieldCards,
+  ProductEnterpriseRegistrationCard,
   ProductPriceSection,
 } from "@/app/(app_routes)/products/_components/product-enterprise-field"
 import type { ProductEnterprise } from "@/modules/products/products.schema"
@@ -22,8 +23,11 @@ export function ProductDetailView({
 }: ProductDetailViewProps) {
   return (
     <div className="space-y-6">
-      <ProductEnterpriseDetailsCard product={product} />
-      <ProductPriceSection price={price} canConsult={canConsultPrices} />
+      <ProductEnterpriseRegistrationCard product={product} />
+      <div className="grid gap-6 sm:grid-cols-2">
+        <ProductEnterpriseFieldCards product={product} />
+        <ProductPriceSection price={price} canConsult={canConsultPrices} />
+      </div>
     </div>
   )
 }

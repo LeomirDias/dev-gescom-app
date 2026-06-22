@@ -72,7 +72,7 @@ export default function SaleDetailPage({ params }: SaleDetailPageProps) {
 
   if (!ready || !perms.isReady) {
     return (
-      <PaginatedListLayout loading={<SaleDetailLoading />}>{null}</PaginatedListLayout>
+      <PaginatedListLayout isReady={false}>{null}</PaginatedListLayout>
     )
   }
 
@@ -83,9 +83,11 @@ export default function SaleDetailPage({ params }: SaleDetailPageProps) {
   }
 
   return (
-    <PaginatedListLayout
-      loading={saleQuery.isPending ? <SaleDetailLoading /> : null}
-    >
+    <PaginatedListLayout>
+      {saleQuery.isPending ? (
+        <SaleDetailLoading />
+      ) : (
+        <>
       {saleQuery.error && saleQuery.data && (
         <StaleDataBanner
           title="Não foi possível atualizar o detalhe."
@@ -113,6 +115,8 @@ export default function SaleDetailPage({ params }: SaleDetailPageProps) {
             <SaleBudgetConversionsTable conversions={conversionsQuery.data} />
           )}
         </div>
+      )}
+        </>
       )}
     </PaginatedListLayout>
   )
