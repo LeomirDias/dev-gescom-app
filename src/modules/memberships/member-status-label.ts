@@ -3,6 +3,11 @@ import type { MemberStatus } from "@/modules/memberships/memberships.schema"
 const STATUS_LABELS: Record<MemberStatus, string> = {
   ATIVO: "Ativo",
   INATIVO: "Inativo",
+  BLOQUEADO: "Bloqueado",
+  PENDENTE: "Pendente",
+  ESPECIAL: "Especial",
+  COBRANCA: "Cobrança",
+  NAO_VENDER: "Não vender",
 }
 
 export function getMemberStatusLabel(status: MemberStatus | string): string {
