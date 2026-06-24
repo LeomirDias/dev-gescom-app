@@ -1,8 +1,12 @@
 "use client"
 
-import { LinkClientPageContent } from "@/app/(app_routes)/clients/_components/link-client-page"
-import { CLIENTS_ROUTE_CONFIG } from "@/modules/memberships/membership-route-config"
+import { useRequireEnterprise } from "@/hooks/use-require-enterprise"
+import { LinkClientPage } from "@/app/(app_routes)/clients/link/_components/link-client-page"
 
-export default function LinkClientPage() {
-  return <LinkClientPageContent config={CLIENTS_ROUTE_CONFIG} />
+export default function LinkClientRoutePage() {
+  const { enterpriseId } = useRequireEnterprise()
+
+  if (!enterpriseId) return null
+
+  return <LinkClientPage enterpriseId={enterpriseId} />
 }

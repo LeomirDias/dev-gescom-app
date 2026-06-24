@@ -7,10 +7,7 @@ import { defaultProductsEnterprisesFilters } from "@/app/(app_routes)/products/_
 import { useOperatorPermissions } from "@/lib/permissions"
 import { prefetchTenantQuery } from "@/lib/react-query/prefetch"
 import { useActiveEnterpriseId } from "@/lib/tenant/use-active-enterprise-id"
-import {
-  CLIENTS_ROUTE_CONFIG,
-  MEMBERS_ROUTE_CONFIG,
-} from "@/modules/memberships/membership-route-config"
+import type { ListMembersQuery } from "@/modules/memberships/memberships.schema"
 import { membersQueryKey } from "@/modules/memberships/memberships-query-keys"
 import { listMembersService } from "@/modules/memberships/memberships.service"
 import { productsQueryKeys } from "@/modules/products/products-query-keys"
@@ -22,6 +19,13 @@ import { stockQueryKeys } from "@/modules/stock/stock-query-keys"
 import { listStockSectorsService } from "@/modules/stock/stock.service"
 
 const DEFAULT_STOCK_FILTERS = { limit: 50, offset: 0 }
+
+const DEFAULT_MEMBERS_LIST_FILTERS: ListMembersQuery = {
+  class: undefined,
+  userId: undefined,
+  offset: 0,
+  limit: 50,
+}
 
 export function useListRoutePrefetch() {
   const queryClient = useQueryClient()
@@ -41,31 +45,15 @@ export function useListRoutePrefetch() {
           })
           break
         case "/members":
-          if (!perms.canConsultMembers) return
-          prefetchTenantQuery(queryClient, {
-            queryKey: membersQueryKey(
-              enterpriseId,
-              MEMBERS_ROUTE_CONFIG.defaultListFilters()
-            ),
-            queryFn: () =>
-              listMembersService(
-                enterpriseId,
-                MEMBERS_ROUTE_CONFIG.defaultListFilters()
-              ),
-          })
-          break
         case "/clients":
           if (!perms.canConsultMembers) return
           prefetchTenantQuery(queryClient, {
             queryKey: membersQueryKey(
               enterpriseId,
-              CLIENTS_ROUTE_CONFIG.defaultListFilters()
+              DEFAULT_MEMBERS_LIST_FILTERS
             ),
             queryFn: () =>
-              listMembersService(
-                enterpriseId,
-                CLIENTS_ROUTE_CONFIG.defaultListFilters()
-              ),
+              listMembersService(enterpriseId, DEFAULT_MEMBERS_LIST_FILTERS),
           })
           break
         case "/products":

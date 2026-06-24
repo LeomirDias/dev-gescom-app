@@ -8,12 +8,14 @@ import { ConfirmSoftDeleteDialog } from "@/components/global/dialogs/confirm-sof
 import {
   ProfileEditActions,
   ProfileField,
+  profileFormCardClassName,
 } from "@/app/(app_routes)/profile/_components/profile-field"
 import { UserOnboardingEmpty } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-empty"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -131,13 +133,19 @@ export function UserContactsSection({
   const editingContact =
     editingTarget?.mode === "edit" ? editingTarget.contact : null
 
+  const isEditingSection = Boolean(editingTarget)
+
   return (
-    <Card>
+    <Card className={profileFormCardClassName(isEditingSection)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Phone className="size-5 text-primary text-base" aria-hidden />
-          Contatos
+        <CardTitle className="text-base">
+          {isEditingSection ? "Editar contatos" : "Contatos"}
         </CardTitle>
+        <CardDescription>
+          {isEditingSection
+            ? "Edite ou adicione contatos secundários ou de referência"
+            : "Contatos secundários e de referência"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {contacts.length === 0 && !isCreating ? (

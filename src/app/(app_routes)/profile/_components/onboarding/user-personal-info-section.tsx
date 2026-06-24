@@ -7,11 +7,13 @@ import { toast } from "sonner"
 import {
   ProfileEditActions,
   ProfileField,
+  profileFormCardClassName,
 } from "@/app/(app_routes)/profile/_components/profile-field"
 import { UserOnboardingEmpty } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-empty"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -108,12 +110,16 @@ export function UserPersonalInfoSection({
   }
 
   return (
-    <Card>
+    <Card className={profileFormCardClassName(editing)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="size-5 text-primary text-base" aria-hidden />
-          Informações pessoais
+        <CardTitle className="text-base">
+          {editing ? "Editar informações pessoais" : "Informações pessoais"}
         </CardTitle>
+        <CardDescription>
+          {editing
+            ? "Edite gênero, data de nascimento ou local de nascimento"
+            : "Gênero, data de nascimento e local de nascimento"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {!exists && !editing ? (

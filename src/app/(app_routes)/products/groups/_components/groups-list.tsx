@@ -148,6 +148,10 @@ export function GroupsList() {
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
+          hasSearched={hasSearched}
+          appliedValues={{
+            description: appliedClientCriteria.description,
+          }}
           searchLabel="Buscar grupos"
           searchTooltip="Buscar grupos de produto"
           loadingLabel="Carregando grupos..."

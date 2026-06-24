@@ -39,6 +39,7 @@ function buildMembersQuery(query: ListMembersQuery): string {
   if (parsed.userId) params.set("userId", parsed.userId)
   if (parsed.class) params.set("class", parsed.class)
   if (parsed.status) params.set("status", parsed.status)
+  if (parsed.code !== undefined) params.set("code", String(parsed.code))
   if (parsed.registration) params.set("registration", parsed.registration)
   if (parsed.email) params.set("email", parsed.email)
   if (parsed.phone) params.set("phone", parsed.phone)

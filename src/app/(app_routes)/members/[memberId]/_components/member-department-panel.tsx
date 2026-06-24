@@ -4,7 +4,6 @@ import { useMemo, useState } from "react"
 import { Layers, Trash2 } from "lucide-react"
 
 import { EnterprisePermissionBadge } from "@/app/(app_routes)/enterprise/_components/enterprise-permission-badge"
-import { MemberStatusBadge } from "@/app/(app_routes)/members/_components/member-status-badge"
 import { Button } from "@/components/ui/button"
 import type { MemberDepartment } from "@/modules/memberships/memberships.schema"
 import type { MemberDepartmentPermissionEntry } from "@/modules/memberships/member-department-permissions"
@@ -12,6 +11,7 @@ import {
   useUpdateMemberExtraPermissionMutation,
   useUpdateMemberPermissionDefaultMutation,
 } from "@/modules/memberships/use-members"
+import { StatusBadge } from "@/components/global/returns/status-badge"
 
 export function MemberDepartmentPanel({
   department,
@@ -90,7 +90,7 @@ export function MemberDepartmentPanel({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <MemberStatusBadge status={department.status} />
+          <StatusBadge status={department.status} />
           {canAlter && (
             <Button
               type="button"

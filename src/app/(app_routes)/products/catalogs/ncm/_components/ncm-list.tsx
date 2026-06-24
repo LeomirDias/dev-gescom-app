@@ -157,6 +157,11 @@ export function NcmList() {
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
+          hasSearched={hasSearched}
+          appliedValues={{
+            ncm: appliedClientCriteria.ncm,
+            description: appliedClientCriteria.description,
+          }}
           searchLabel="Buscar NCM"
           searchTooltip="Buscar códigos NCM"
           loadingLabel="Carregando NCM..."

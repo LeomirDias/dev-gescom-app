@@ -7,11 +7,13 @@ import { toast } from "sonner"
 import {
   ProfileEditActions,
   ProfileField,
+  profileFormCardClassName,
 } from "@/app/(app_routes)/profile/_components/profile-field"
 import { UserOnboardingEmpty } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-empty"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -205,12 +207,16 @@ export function UserTaxInfosSection({
   }
 
   return (
-    <Card>
+    <Card className={profileFormCardClassName(editing)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="size-5 text-primary text-base" aria-hidden />
-          Informações fiscais
+        <CardTitle className="text-base">
+          {editing ? "Editar informações fiscais" : "Informações fiscais"}
         </CardTitle>
+        <CardDescription>
+          {editing
+            ? "Edite inscrições estaduais, municipais ou SPC"
+            : "Inscrições estaduais, municipais e SPC"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {!exists && !editing ? (

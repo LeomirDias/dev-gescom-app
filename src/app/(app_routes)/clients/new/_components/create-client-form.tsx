@@ -24,14 +24,8 @@ import {
   normalizeEmail,
   normalizePhone,
   normalizeRegistration,
-  validateDepartmentsPayload,
 } from "@/modules/memberships/memberships-rules"
 import { useCreateMemberWithUserMutation } from "@/modules/memberships/use-members"
-import {
-  cpfCnpjSchema,
-  cpfCnpjValidationMessage,
-} from "@/lib/validation/cpf-cnpj"
-import { phoneE164Schema } from "@/lib/validation/phone"
 
 const USER_FIELDS: PageFormField[] = [
   {
@@ -39,6 +33,7 @@ const USER_FIELDS: PageFormField[] = [
     name: "userName",
     placeholder: "Informe o nome",
     required: true,
+    className: "sm:col-span-2",
   },
   {
     id: "userRegistration",
@@ -62,14 +57,13 @@ const USER_FIELDS: PageFormField[] = [
   },
 ]
 
-export function CreateMemberForm({
+export function CreateClientForm({
   enterpriseId,
   class: fixedClass,
-  title = "Novo membro",
-  subtitle = "Crie um novo membro com um novo usuário",
-  submitLabel = "Criar membro",
-  pendingLabel = "Criando membro...",
-  onSuccess,
+  title = "Novo cliente",
+  subtitle = "Crie um novo cliente com um novo usuário",
+  submitLabel = "Criar cliente",
+  pendingLabel = "Criando cliente...",
 }: {
   enterpriseId: string
   class?: EnterpriseMemberClass
@@ -77,12 +71,11 @@ export function CreateMemberForm({
   subtitle?: string
   submitLabel?: string
   pendingLabel?: string
-  onSuccess?: (memberId: string) => void
 }) {
   const router = useRouter()
   const mutation = useCreateMemberWithUserMutation(enterpriseId)
   const [memberClass, setMemberClass] = useState<EnterpriseMemberClass>(
-    fixedClass ?? "COLABORADOR"
+    fixedClass ?? "CLIENTE"
   )
   const [departments, setDepartments] = useState<MemberDepartmentPayload[]>([])
   const effectiveClass = fixedClass ?? memberClass
@@ -103,25 +96,7 @@ export function CreateMemberForm({
       (form.elements.namedItem("userPhone") as HTMLInputElement).value
     )
     if (!userName || !userRegistration || !userEmail || !userPhone) {
-      toast.error("Preencha todos os campos do utilizador.")
-      return
-    }
-
-    const regParsed = cpfCnpjSchema.safeParse(userRegistration)
-    if (!regParsed.success) {
-      toast.error(cpfCnpjValidationMessage(userRegistration))
-      return
-    }
-
-    const phoneParsed = phoneE164Schema.safeParse(userPhone)
-    if (!phoneParsed.success) {
-      toast.error("Telefone inválido. Use formato +5511999999999.")
-      return
-    }
-
-    const deptValidation = validateDepartmentsPayload(effectiveClass, departments)
-    if (!deptValidation.ok) {
-      toast.error(deptValidation.message)
+      toast.error("Preencha todos os campos do cliente.")
       return
     }
 
@@ -129,20 +104,16 @@ export function CreateMemberForm({
       const result = await mutation.mutateAsync({
         user: {
           userName,
-          userRegistration: regParsed.data,
+          userRegistration,
           userEmail,
-          userPhone: phoneParsed.data,
+          userPhone,
         },
         member: {
           class: effectiveClass,
           departments: isClienteClass(effectiveClass) ? [] : departments,
         },
       })
-      if (onSuccess) {
-        onSuccess(result.member.id)
-      } else {
-        router.push(`/members/${result.member.id}`)
-      }
+      router.push(`/members/${result.member.id}`)
     } catch {
       /* erros de mutação tratados globalmente pelo QueryClient */
     }
@@ -150,7 +121,6 @@ export function CreateMemberForm({
 
   return (
     <PageFormCard
-      variant="sheet"
       title={title}
       subtitle={subtitle}
       fields={USER_FIELDS}
@@ -158,7 +128,6 @@ export function CreateMemberForm({
       submitLabel={submitLabel}
       pendingLabel={pendingLabel}
       isPending={mutation.isPending}
-      cardClassName="h-full"
     >
       {!fixedClass ? (
         <>
@@ -183,7 +152,7 @@ export function CreateMemberForm({
               </SelectContent>
             </Select>
           </Field>
-          <Field>
+          <Field className="sm:col-span-2">
             <MemberDepartmentsPicker
               memberClass={memberClass}
               departments={departments}

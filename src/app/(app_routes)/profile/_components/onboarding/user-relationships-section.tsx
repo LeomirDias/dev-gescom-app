@@ -7,11 +7,13 @@ import { toast } from "sonner"
 import {
   ProfileEditActions,
   ProfileField,
+  profileFormCardClassName,
 } from "@/app/(app_routes)/profile/_components/profile-field"
 import { UserOnboardingEmpty } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-empty"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -226,12 +228,16 @@ export function UserRelationshipsSection({
   }
 
   return (
-    <Card>
+    <Card className={profileFormCardClassName(editing)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="size-5 text-primary text-base" aria-hidden />
-          Relacionamentos
+        <CardTitle className="text-base">
+          {editing ? "Editar relacionamentos" : "Relacionamentos"}
         </CardTitle>
+        <CardDescription>
+          {editing
+            ? "Edite estado civil, moradia, filiação ou profissão"
+            : "Estado civil, moradia, filiação e profissão"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {!exists && !editing ? (

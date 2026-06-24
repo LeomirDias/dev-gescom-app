@@ -157,6 +157,11 @@ export function CestList() {
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
+          hasSearched={hasSearched}
+          appliedValues={{
+            cest: appliedClientCriteria.cest,
+            description: appliedClientCriteria.description,
+          }}
           searchLabel="Buscar CEST"
           searchTooltip="Buscar códigos CEST"
           loadingLabel="Carregando CEST..."

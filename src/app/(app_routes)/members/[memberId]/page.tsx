@@ -1,8 +1,7 @@
 "use client"
 
-import { MemberDetailPageContent } from "@/app/(app_routes)/members/_components/member-detail-page"
-import { MEMBERS_ROUTE_CONFIG } from "@/modules/memberships/membership-route-config"
+import { MemberDetailPage } from "@/app/(app_routes)/members/[memberId]/_components/member-detail-page"
 
-export default function MemberDetailPage() {
-  return <MemberDetailPageContent config={MEMBERS_ROUTE_CONFIG} />
+export default function MemberDetailRoutePage() {
+  return <MemberDetailPage />
 }

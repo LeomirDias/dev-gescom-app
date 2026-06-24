@@ -7,10 +7,13 @@ import {
   BadgeCheck,
   Calendar,
   Fingerprint,
+  Hash,
   Mail,
   Pencil,
   Phone,
+  Trash,
   User,
+  X,
 } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -33,8 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MemberClassBadge } from "@/app/(app_routes)/members/_components/member-class-badge"
-import { MemberStatusBadge } from "@/app/(app_routes)/members/_components/member-status-badge"
+import { StatusBadge } from "@/components/global/returns/status-badge"
 import { formatCpfCnpj, formatDateOnly, formatPhone } from "@/lib/formatters"
 import { getUserInitials } from "@/lib/user-initials"
 import { cn } from "@/lib/utils"
@@ -44,7 +46,6 @@ import {
   getMemberClassLabel,
   MEMBER_CLASS_OPTIONS,
 } from "@/modules/memberships/member-class-label"
-import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
 import {
   getMemberStatusLabel,
   MEMBER_STATUS_OPTIONS,
@@ -67,6 +68,7 @@ import {
 } from "@/modules/memberships/use-members"
 import { useUpdateUserMutation, useUserQuery } from "@/modules/users/use-users"
 import { userDetailsQueryKey } from "@/modules/users-onboarding/use-users-onboarding"
+import { MemberClassBadge } from "../../_components/member-class-badge"
 
 export type MemberSelectOption = {
   value: string
@@ -79,12 +81,44 @@ function formatValue(value: string | null | undefined | boolean): string {
   return String(value)
 }
 
+function memberFormCardClassName(editing: boolean) {
+  return cn(
+    !editing && "border-none ring-0 shadow-md transition-all duration-450",
+    editing &&
+    "bg-primary/5 border-primary/40 ring-primary/40 shadow-md transition-all duration-450"
+  )
+}
+
+function MemberFieldReveal({
+  open,
+  className,
+  children,
+}: {
+  open: boolean
+  className?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className={cn(
+        "grid transition-[grid-template-rows,opacity] duration-450 ease-in-out",
+        open
+          ? "grid-rows-[1fr] opacity-100"
+          : "pointer-events-none grid-rows-[0fr] opacity-0",
+        className
+      )}
+      aria-hidden={!open}
+    >
+      <div className="min-h-0 overflow-hidden">{children}</div>
+    </div>
+  )
+}
+
 export function MemberField({
   label,
   value,
   icon: Icon,
   className,
-  mono,
   multiline,
   editing = false,
   editValue,
@@ -99,7 +133,6 @@ export function MemberField({
   value: string | null | undefined | boolean
   icon: LucideIcon
   className?: string
-  mono?: boolean
   multiline?: boolean
   editing?: boolean
   editValue?: string
@@ -115,26 +148,57 @@ export function MemberField({
   const isSelectEdit =
     editing && Boolean(editSelectOptions?.length && onEditChange)
 
+  const activeFieldStyles =
+    "group-focus-within:border-primary/40 group-has-data-[state=open]:border-primary/40"
+  const activeLegendStyles =
+    "group-focus-within:text-primary group-has-data-[state=open]:text-primary"
+  const activeIconStyles =
+    "group-focus-within:bg-transparent group-focus-within:text-primary group-focus-within:ring-0 group-focus-within:shadow-none group-has-data-[state=open]:bg-transparent group-has-data-[state=open]:text-primary group-has-data-[state=open]:ring-0 group-has-data-[state=open]:shadow-none"
+  const activeInputStyles =
+    "group-focus-within:text-primary group-has-data-[state=open]:text-primary bg-transparent px-2 dark:bg-transparent"
+  const memberSelectTriggerClassName = cn(
+    "min-w-0 flex-1 h-auto w-full border-0 bg-transparent p-0 shadow-none",
+    "text-sm font-medium transition-all duration-450",
+    "focus-visible:border-0 focus-visible:ring-0",
+    "data-[size=default]:h-auto data-[size=sm]:h-auto",
+    "dark:bg-transparent dark:hover:bg-transparent",
+    "[&_svg]:text-muted-foreground [&_svg]:transition-all [&_svg]:duration-450",
+    "focus:text-primary focus:[&_svg]:text-primary",
+    "data-[state=open]:text-primary data-[state=open]:[&_svg]:text-primary",
+    editing && activeInputStyles
+  )
+
   return (
-    <fieldset className={cn("min-w-0 space-y-2", className)}>
-      <legend className="text-xs font-medium tracking-wide text-muted-foreground">
+    <fieldset className={cn("group min-w-0 space-y-2", className)}>
+      <legend
+        className={cn(
+          "text-xs font-medium tracking-wide text-muted-foreground transition-all duration-450",
+          editing && activeLegendStyles
+        )}
+      >
         {label}
       </legend>
       <div
         className={cn(
-          "flex min-h-10 gap-3 border border-border/60 bg-muted/25 px-3 py-2.5 transition-colors",
+          "flex min-h-10 gap-3 border border-border/60 bg-muted/25 px-3 py-2.5 transition-all duration-450",
           multiline && !empty && !editing ? "items-start" : "items-center",
-          !editing && empty && "text-muted-foreground"
+          !editing && empty && "text-muted-foreground",
+          editing && activeFieldStyles
         )}
       >
-        <span className="flex size-8 shrink-0 items-center justify-center bg-background/80 text-muted-foreground shadow-sm ring-1 ring-border/50">
+        <span
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center bg-background/80 text-muted-foreground shadow-sm ring-1 ring-border/50 transition-all duration-450",
+            editing && activeIconStyles
+          )}
+        >
           <Icon className="size-4" aria-hidden />
         </span>
         {isSelectEdit ? (
           <Select value={editValue ?? ""} onValueChange={onEditChange}>
             <SelectTrigger
               id={inputId}
-              className="min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+              className={memberSelectTriggerClassName}
             >
               <SelectValue placeholder={editPlaceholder ?? "Selecione..."} />
             </SelectTrigger>
@@ -154,15 +218,14 @@ export function MemberField({
             onChange={(e) => onEditChange(e.target.value)}
             required={required}
             className={cn(
-              "min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0",
-              mono && "font-mono text-xs sm:text-sm"
+              "min-w-0 flex-1 border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 transition-all duration-450",
+              !empty && activeInputStyles
             )}
           />
         ) : (
           <span
             className={cn(
               "min-w-0 flex-1 text-sm font-medium text-foreground",
-              mono && "font-mono text-xs sm:text-sm",
               empty && "font-normal",
               multiline && !empty
                 ? "whitespace-pre-wrap wrap-break-words"
@@ -204,7 +267,6 @@ export function MemberEditActions({
           variant="outline"
           onClick={onStartEdit}
           aria-label={editLabel}
-          tooltip={editLabel}
           className="w-full"
         >
           <Pencil className="size-4" aria-hidden />
@@ -215,22 +277,26 @@ export function MemberEditActions({
   }
 
   return (
-    <div className="flex flex-wrap justify-end gap-2 border-t border-border/60 pt-4">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={onCancel}
-        disabled={isPending}
-      >
-        Cancelar
-      </Button>
+    <div className="flex gap-2 items-center">
       <Button
         type="button"
         onClick={onSave}
         disabled={isPending}
-        tooltip="Salvar alterações"
+        className="w-full flex-1"
       >
         {isPending ? "Salvando..." : "Salvar"}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        aria-label="Cancelar edição"
+        tooltip="Cancelar edição"
+        className="border-0 shadow-none ring-0"
+        onClick={onCancel}
+        disabled={isPending}
+      >
+        <X className="size-4" aria-hidden />
       </Button>
     </div>
   )
@@ -238,25 +304,22 @@ export function MemberEditActions({
 
 export function MemberDetailHeader({
   member,
-  config,
 }: {
   member: MemberDetail
-  config: MembershipRouteConfig
 }) {
-  const displayName =
-    member.user.userName.trim() || config.labels.defaultDisplayName
+  const displayName = member.user.userName.trim()
   const initials = getUserInitials(displayName)
 
   return (
-    <Card>
+    <Card className="border-none ring-0 shadow-md">
       <CardContent className="space-y-4 pt-6">
         <div className="flex justify-center">
           <Avatar
             size="default"
-            className="size-24 ring-2 ring-background shadow-md after:border-0"
+            className="size-20 shrink-0 ring-2 ring-primary shadow-md after:border-0 sm:size-24"
           >
-            <AvatarFallback className="bg-primary/15 text-4xl font-semibold tracking-tight text-primary">
-              {initials}
+            <AvatarFallback className="bg-transparent text-3xl font-semibold tracking-tight sm:text-4xl">
+              <span className="text-primary">{initials}</span>
             </AvatarFallback>
           </Avatar>
         </div>
@@ -265,15 +328,9 @@ export function MemberDetailHeader({
             {displayName}
           </h1>
           <div className="flex flex-wrap items-center justify-center gap-2">
+            <StatusBadge status={member.status} />
             <MemberClassBadge memberClass={member.class} />
-            <MemberStatusBadge status={member.status} />
           </div>
-          <p
-            className="font-mono text-xs text-muted-foreground pt-2"
-            title={member.id}
-          >
-            {config.labels.identifierLabel}: {member.id.slice(0, 8)}
-          </p>
         </div>
       </CardContent>
     </Card>
@@ -377,10 +434,10 @@ export function MemberUserInfoCard({
   }
 
   return (
-    <Card>
+    <Card className={memberFormCardClassName(editing)}>
       <CardHeader>
-        <CardTitle className="text-base">Dados do usuário</CardTitle>
-        <CardDescription>Informações cadastrais do usuário</CardDescription>
+        <CardTitle className="text-base">{editing ? "Editar dados do usuário" : "Dados do usuário"}</CardTitle>
+        <CardDescription>{editing ? "Edite as informações cadastrais do usuário" : "Informações cadastrais do usuário"}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -388,7 +445,6 @@ export function MemberUserInfoCard({
             label="Nome"
             value={user.userName}
             icon={User}
-            className="sm:col-span-2"
             editing={editing}
             editValue={userName}
             onEditChange={setUserName}
@@ -399,7 +455,6 @@ export function MemberUserInfoCard({
             label="CPF/CNPJ"
             value={formatCpfCnpj(user.userRegistration)}
             icon={Fingerprint}
-            mono
             editing={editing}
             editValue={userRegistration}
             onEditChange={setUserRegistration}
@@ -447,13 +502,11 @@ export function MemberUserInfoCard({
 export function MemberLinkCard({
   member,
   enterpriseId,
-  config,
   canEdit,
   onUpdateSuccess,
 }: {
   member: MemberDetail
   enterpriseId: string
-  config: MembershipRouteConfig
   canEdit?: boolean
   onUpdateSuccess?: () => void
 }) {
@@ -465,7 +518,6 @@ export function MemberLinkCard({
   )
   const [status, setStatus] = useState<MemberStatus>(member.status)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const allowClassEdit = config.detail.allowClassEdit
 
   const {
     data: includedByMembers,
@@ -514,7 +566,7 @@ export function MemberLinkCard({
 
   async function handleSave() {
     const patch: { class?: EnterpriseMemberClass; status?: MemberStatus } = {}
-    if (allowClassEdit && memberClass !== member.class) {
+    if (memberClass !== member.class) {
       patch.class = memberClass
     }
     if (status !== member.status) patch.status = status
@@ -538,7 +590,7 @@ export function MemberLinkCard({
     try {
       await mutation.mutateAsync({ softDelete: true })
       setConfirmDelete(false)
-      router.push(config.basePath)
+      router.push("/members")
     } catch {
       /* erros de mutação tratados globalmente pelo QueryClient */
     }
@@ -546,54 +598,81 @@ export function MemberLinkCard({
 
   return (
     <>
-      <Card>
+      <Card className={memberFormCardClassName(editing)}>
         <CardHeader>
-          <CardTitle className="text-base">{config.detail.linkCardTitle}</CardTitle>
-          <CardDescription>{config.detail.linkCardDescription}</CardDescription>
+          <CardTitle className="text-base">
+            {editing ? "Editar vínculo" : "Vínculo"}
+          </CardTitle>
+          <CardDescription>
+            {editing
+              ? "Edite as informações sobre o vínculo do membro"
+              : "Informações sobre o vínculo do membro"}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {allowClassEdit && (
-              <MemberField
-                label="Classe"
-                value={getMemberClassLabel(member.class)}
-                icon={BadgeCheck}
-                editing={editing}
-                editValue={memberClass}
-                onEditChange={(v) => setMemberClass(v as EnterpriseMemberClass)}
-                editSelectOptions={MEMBER_CLASS_OPTIONS}
-                inputId="member-class"
-              />
-            )}
-            <MemberField
-              label="Status"
-              value={getMemberStatusLabel(member.status)}
-              icon={BadgeCheck}
-              editing={editing}
-              editValue={status}
-              onEditChange={(v) => setStatus(v as MemberStatus)}
-              editSelectOptions={MEMBER_STATUS_OPTIONS}
-              inputId="member-status"
-            />
-            <MemberField
-              label="Registrado em"
-              value={formatDateOnly(member.registeredOn)}
-              icon={Calendar}
-            />
-            <MemberField
-              label="Aprovado em"
-              value={formatDateOnly(member.approvedAt)}
-              icon={Calendar}
-            />
-            <MemberField
-              label="Incluído por"
-              value={includedByPending ? "…" : (includedByDisplay ?? "—")}
-              icon={User}
-              className="sm:col-span-2"
-            />
+          <div className="space-y-0">
+            <MemberFieldReveal open={!editing}>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <MemberField
+                  label="Código"
+                  value={member.code != null ? String(member.code) : null}
+                  icon={Hash}
+                />
+                <MemberField
+                  label="Classe"
+                  value={getMemberClassLabel(member.class)}
+                  icon={BadgeCheck}
+                />
+                <MemberField
+                  label="Status"
+                  value={getMemberStatusLabel(member.status)}
+                  icon={BadgeCheck}
+                />
+                <MemberField
+                  label="Registrado em"
+                  value={formatDateOnly(member.registeredOn)}
+                  icon={Calendar}
+                />
+                <MemberField
+                  label="Aprovado em"
+                  value={formatDateOnly(member.approvedAt)}
+                  icon={Calendar}
+                />
+                <MemberField
+                  label="Incluído por"
+                  value={includedByPending ? "…" : (includedByDisplay ?? "—")}
+                  icon={User}
+                />
+              </div>
+            </MemberFieldReveal>
+
+            <MemberFieldReveal open={editing}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <MemberField
+                  label="Classe"
+                  value={getMemberClassLabel(member.class)}
+                  icon={BadgeCheck}
+                  editing
+                  editValue={memberClass}
+                  onEditChange={(v) => setMemberClass(v as EnterpriseMemberClass)}
+                  editSelectOptions={MEMBER_CLASS_OPTIONS}
+                  inputId="member-class"
+                />
+                <MemberField
+                  label="Status"
+                  value={getMemberStatusLabel(member.status)}
+                  icon={BadgeCheck}
+                  editing
+                  editValue={status}
+                  onEditChange={(v) => setStatus(v as MemberStatus)}
+                  editSelectOptions={MEMBER_STATUS_OPTIONS}
+                  inputId="member-status"
+                />
+              </div>
+            </MemberFieldReveal>
           </div>
           {canEdit && (
-            <>
+            <div className={cn("w-full", !editing && "w-full flex justify-between gap-2 items-center")}>
               <MemberEditActions
                 editing={editing}
                 canEdit
@@ -603,18 +682,19 @@ export function MemberLinkCard({
                 isPending={mutation.isPending}
                 editLabel="Editar vínculo"
               />
+              <div />
               {!editing && (
                 <Button
                   type="button"
                   variant="destructive"
-                  className="w-full"
+                  className="border-0 shadow-none ring-0"
                   onClick={() => setConfirmDelete(true)}
-                  tooltip={config.detail.softDeleteLabel}
+                  tooltip="Remover vínculo"
                 >
-                  {config.detail.softDeleteLabel}
+                  <Trash className="size-4" aria-hidden />
                 </Button>
               )}
-            </>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -622,9 +702,9 @@ export function MemberLinkCard({
       <ConfirmSoftDeleteDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={config.detail.softDeleteTitle}
-        description={config.detail.softDeleteDescription}
-        confirmLabel={config.detail.softDeleteConfirm}
+        title="Remover vínculo"
+        description="Tem certeza que deseja remover o vínculo do membro? Esta ação não pode ser desfeita."
+        confirmLabel="Remover vínculo"
         isPending={mutation.isPending}
         onConfirm={() => void handleSoftDelete()}
       />

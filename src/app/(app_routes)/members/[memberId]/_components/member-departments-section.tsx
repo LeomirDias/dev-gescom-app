@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { Building2, Plus } from "lucide-react"
 
-import { MemberDepartmentForm } from "@/app/(app_routes)/members/_components/member-department-form"
-import { MemberDepartmentPanel } from "@/app/(app_routes)/members/_components/member-department-panel"
+import { MemberDepartmentForm } from "@/app/(app_routes)/members/[memberId]/_components/member-department-form"
+import { MemberDepartmentPanel } from "@/app/(app_routes)/members/[memberId]/_components/member-department-panel"
 import { ConfirmSoftDeleteDialog } from "@/components/global/dialogs/confirm-soft-delete-dialog"
 import {
   SectionToggle,

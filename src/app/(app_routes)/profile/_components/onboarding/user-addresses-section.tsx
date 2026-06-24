@@ -5,7 +5,7 @@ import { MapPin, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { ConfirmSoftDeleteDialog } from "@/components/global/dialogs/confirm-soft-delete-dialog"
-import { ProfileEditActions } from "@/app/(app_routes)/profile/_components/profile-field"
+import { ProfileEditActions, profileFormCardClassName } from "@/app/(app_routes)/profile/_components/profile-field"
 import { UserOnboardingEmpty } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-empty"
 import {
   UserAddressCreateForm,
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -74,13 +75,19 @@ export function UserAddressesSection({
     }
   }
 
+  const isEditingSection = Boolean(editingTarget)
+
   return (
-    <Card>
+    <Card className={profileFormCardClassName(isEditingSection)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="size-5 text-primary text-base" aria-hidden />
-          Endereços
+        <CardTitle className="text-base">
+          {isEditingSection ? "Editar endereços" : "Endereços"}
         </CardTitle>
+        <CardDescription>
+          {isEditingSection
+            ? "Edite ou adicione endereços com país, estado, cidade e CEP"
+            : "Endereços com país, estado, cidade e CEP"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {addresses.length === 0 && !isCreating ? (

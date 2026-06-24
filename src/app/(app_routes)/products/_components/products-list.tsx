@@ -298,6 +298,20 @@ export function ProductsList({ config }: ProductsListProps) {
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
+          hasSearched={hasSearched}
+          appliedValues={{
+            code:
+              appliedFilters.code != null ? String(appliedFilters.code) : "",
+            description: appliedFilters.description ?? "",
+            barcode: appliedFilters.barCode ?? "",
+            manufacturer: appliedFilters.manufacturer ?? "",
+            origin: appliedFilters.origin ?? "",
+            group: appliedFilters.group ?? "",
+            subgroup: appliedFilters.subgroup ?? "",
+            brand: appliedFilters.brand ?? "",
+            application: appliedFilters.application ?? "",
+            locacao: appliedClientCriteria.locacao ?? "",
+          }}
           searchLabel="Buscar produto"
           searchTooltip="Buscar produtos"
           loadingLabel="Carregando produtos..."

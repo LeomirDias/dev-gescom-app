@@ -149,6 +149,10 @@ export function SubgroupsList() {
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
+          hasSearched={hasSearched}
+          appliedValues={{
+            description: appliedClientCriteria.description,
+          }}
           searchLabel="Buscar subgrupos"
           searchTooltip="Buscar subgrupos de produto"
           loadingLabel="Carregando subgrupos..."

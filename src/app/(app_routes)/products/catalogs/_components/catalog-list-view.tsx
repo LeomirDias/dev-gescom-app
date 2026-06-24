@@ -165,6 +165,13 @@ export function CatalogListView<T extends { id: string }>({
             fields={searchFields}
             onSearch={applySearch}
             isSearching={isSearching}
+            hasSearched={hasSearched}
+            appliedValues={{
+              search:
+                "search" in appliedFilters
+                  ? appliedFilters.search
+                  : undefined,
+            }}
             searchLabel="Buscar"
             searchTooltip={`Buscar ${config.title.toLowerCase()}`}
             loadingLabel={`Carregando ${config.title.toLowerCase()}...`}

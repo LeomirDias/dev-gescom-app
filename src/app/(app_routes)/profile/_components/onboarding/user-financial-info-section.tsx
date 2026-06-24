@@ -7,11 +7,13 @@ import { toast } from "sonner"
 import {
   ProfileEditActions,
   ProfileField,
+  profileFormCardClassName,
 } from "@/app/(app_routes)/profile/_components/profile-field"
 import { UserOnboardingEmpty } from "@/app/(app_routes)/profile/_components/onboarding/user-onboarding-empty"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -237,12 +239,16 @@ export function UserFinancialInfoSection({
   }
 
   return (
-    <Card>
+    <Card className={profileFormCardClassName(editing)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Banknote className="size-5 text-primary text-base" aria-hidden />
-          Informações financeiras
+        <CardTitle className="text-base">
+          {editing ? "Editar informações financeiras" : "Informações financeiras"}
         </CardTitle>
+        <CardDescription>
+          {editing
+            ? "Edite limites de desconto, ICMS ou condições de crédito"
+            : "Limites de desconto, ICMS e condições de crédito"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {!exists && !editing ? (

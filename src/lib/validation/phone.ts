@@ -37,3 +37,9 @@ export const apiPhoneSchema = z
   .transform(normalizePhoneToE164)
   .pipe(phoneE164Schema)
 
+/** Telefone opcional/nullable da API: `""` e `null` são normalizados para `null`. */
+export const apiNullablePhoneSchema = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? null : v),
+  z.union([z.null(), apiPhoneSchema])
+)
+

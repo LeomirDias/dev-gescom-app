@@ -44,6 +44,7 @@ export type MemberUserSummary = z.infer<typeof memberUserSummarySchema>
 
 export const memberSchema = z.object({
   id: z.uuid(),
+  code: z.number().int().nullable(),
   status: memberStatusSchema,
   userId: z.uuid(),
   enterpriseId: z.uuid(),
@@ -67,6 +68,7 @@ export const listMembersQuerySchema = z.object({
   userId: z.uuid().optional(),
   class: enterpriseMemberClassSchema.optional(),
   status: memberStatusSchema.optional(),
+  code: z.coerce.number().int().positive().optional(),
   registration: cpfCnpjSchema.optional(),
   email: z.string().trim().email().max(255).optional(),
   phone: phoneE164Schema.optional(),

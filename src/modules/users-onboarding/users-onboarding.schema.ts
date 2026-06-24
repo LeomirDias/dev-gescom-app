@@ -1,7 +1,9 @@
 import { z } from "zod"
-import { apiPhoneSchema } from "@/lib/validation/phone"
+import { apiNullableNumberSchema } from "@/lib/schemas/api-number"
+import { apiNullableString } from "@/lib/validation/api-string"
+import { apiNullablePhoneSchema, apiPhoneSchema } from "@/lib/validation/phone"
 
-export const genderSchema = z.enum(["FEMININO", "MASCULINO"])
+export const genderSchema = z.enum(["FEMININO", "MASCULINO", "NÃO_INFORMADO"])
 export type Gender = z.infer<typeof genderSchema>
 
 export const userAddressTypeSchema = z.enum([
@@ -62,7 +64,7 @@ const normalizedHousingTypeSchema = housingTypeInputSchema.transform((v) =>
   v === "PROPRIO" ? "PRÓPRIO" : v
 ) as z.ZodType<HousingType>
 
-export const creditTypeSchema = z.enum(["CREDITO", "DEBITO", "OUTRO"])
+export const creditTypeSchema = z.enum(["MENSAL", "GERAL"])
 export type CreditType = z.infer<typeof creditTypeSchema>
 
 export const accessModeSchema = z.enum(["self", "directory"])
@@ -103,9 +105,9 @@ export type UserAddress = z.infer<typeof userAddressSchema>
 export const userContactSchema = z.object({
   id: z.uuid(),
   type: userContactTypeSchema,
-  phone: apiPhoneSchema.nullable().optional(),
-  email: z.string().nullable().optional(),
-  whatsapp: apiPhoneSchema.nullable().optional(),
+  phone: apiNullablePhoneSchema.optional(),
+  email: apiNullableString({ max: 255 }),
+  whatsapp: apiNullablePhoneSchema.optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().nullable().optional(),
   deletedAt: z.string().nullable().optional(),
@@ -113,29 +115,17 @@ export const userContactSchema = z.object({
 
 export type UserContact = z.infer<typeof userContactSchema>
 
-/** Campos numéricos que a API pode enviar como string (ex.: DECIMAL). */
-const apiNullableNumberSchema = z
-  .union([z.number(), z.string()])
-  .nullable()
-  .optional()
-  .transform((v) => {
-    if (v === undefined) return undefined
-    if (v === null || v === "") return null
-    const n = typeof v === "number" ? v : Number(v)
-    return Number.isNaN(n) ? null : n
-  })
-
 export const relationshipsSchema = z.object({
   id: z.uuid().optional(),
   maritalStatus: maritalStatusSchema.nullable().optional(),
-  spouseName: z.string().min(2).max(255).nullable().optional(),
+  spouseName: apiNullableString({ min: 2, max: 255 }),
   housingType: normalizedHousingTypeSchema.nullable().optional(),
-  rentalPeriod: z.number().nullable().optional(),
-  motherName: z.string().min(2).max(255).nullable().optional(),
-  fatherName: z.string().min(2).max(255).nullable().optional(),
-  profession: z.string().min(2).max(255).nullable().optional(),
-  professionDescription: z.string().min(2).max(255).nullable().optional(),
-  professionTime: z.number().nullable().optional(),
+  rentalPeriod: apiNullableNumberSchema,
+  motherName: apiNullableString({ min: 2, max: 255 }),
+  fatherName: apiNullableString({ min: 2, max: 255 }),
+  profession: apiNullableString({ min: 2, max: 255 }),
+  professionDescription: apiNullableString({ min: 2, max: 255 }),
+  professionTime: apiNullableNumberSchema,
   income: apiNullableNumberSchema,
   linkWithSeller: z.boolean().nullable().optional(),
   toWarmUp: z.boolean().nullable().optional(),
@@ -148,16 +138,16 @@ export type Relationships = z.infer<typeof relationshipsSchema>
 export const taxInfosSchema = z.object({
   id: z.uuid().optional(),
   renegotiation: z.boolean().nullable().optional(),
-  spc_registration: z.string().min(1).max(255).nullable().optional(),
+  spc_registration: apiNullableString({ min: 1, max: 255 }),
   spc_registry_date: z.string().nullable().optional(),
-  stateRegistration: z.string().min(1).max(255).nullable().optional(),
-  municipalRegistration: z.string().min(1).max(255).nullable().optional(),
-  suframa_registration: z.string().min(1).max(255).nullable().optional(),
-  userLegalName: z.string().min(1).max(255).nullable().optional(),
-  r3_code: z.number().nullable().optional(),
+  stateRegistration: apiNullableString({ min: 1, max: 255 }),
+  municipalRegistration: apiNullableString({ min: 1, max: 255 }),
+  suframa_registration: apiNullableString({ min: 1, max: 255 }),
+  userLegalName: apiNullableString({ min: 1, max: 255 }),
+  r3_code: apiNullableNumberSchema,
   sefaz_Date: z.string().nullable().optional(),
-  governmentEntity: z.string().min(1).max(255).nullable().optional(),
-  benefitCode: z.string().min(1).max(255).nullable().optional(),
+  governmentEntity: apiNullableString({ min: 1, max: 255 }),
+  benefitCode: apiNullableString({ min: 1, max: 255 }),
   createdAt: z.string().optional(),
   updatedAt: z.string().nullable().optional(),
 })
@@ -166,20 +156,20 @@ export type TaxInfos = z.infer<typeof taxInfosSchema>
 
 export const financialInfoSchema = z.object({
   id: z.uuid().optional(),
-  ICMSReduction: z.number().nullable().optional(),
-  discountLimit: z.number().nullable().optional(),
-  discoutArrangement: z.string().nullable().optional(),
+  ICMSReduction: apiNullableNumberSchema,
+  discountLimit: apiNullableNumberSchema,
+  discoutArrangement: apiNullableString({ min: 1 }),
   creditType: creditTypeSchema.nullable().optional(),
-  requestAmount: z.number().nullable().optional(),
-  budgetPrice: z.number().nullable().optional(),
-  taxRegime: z.string().nullable().optional(),
+  requestAmount: apiNullableNumberSchema,
+  budgetPrice: apiNullableNumberSchema,
+  taxRegime: apiNullableString({ min: 1 }),
   purchaseOrder: z.boolean().nullable().optional(),
-  prevRate: z.number().nullable().optional(),
-  ratTax: z.number().nullable().optional(),
-  reductionRate: z.number().nullable().optional(),
-  senarTax: z.number().nullable().optional(),
+  prevRate: apiNullableNumberSchema,
+  ratTax: apiNullableNumberSchema,
+  reductionRate: apiNullableNumberSchema,
+  senarTax: apiNullableNumberSchema,
   low: z.boolean().nullable().optional(),
-  sale_discount: z.number().nullable().optional(),
+  sale_discount: apiNullableNumberSchema,
   doSt: z.boolean().nullable().optional(),
   sendNF: z.boolean().nullable().optional(),
   createdAt: z.string().optional(),
@@ -196,7 +186,7 @@ export const userDetailsResponseSchema = z.object({
   relationships: relationshipsSchema.nullable(),
   taxInfos: taxInfosSchema.nullable(),
   financialInfo: financialInfoSchema.nullable(),
-  accessMode: accessModeSchema,
+  accessMode: accessModeSchema.nullable().optional().transform((v) => v ?? "directory"),
 })
 
 export type UserDetailsResponse = z.infer<typeof userDetailsResponseSchema>

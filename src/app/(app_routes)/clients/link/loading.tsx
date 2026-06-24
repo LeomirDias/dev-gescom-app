@@ -1,12 +1,10 @@
-import { MembershipLinkContentLoading } from "@/app/(app_routes)/members/_components/members-route-loading"
-import { Skeleton } from "@/components/ui/skeleton"
-import { CLIENTS_ROUTE_CONFIG } from "@/modules/memberships/membership-route-config"
+
+import { AnimatedLoading } from "@/components/global/listing/paginated-list-shell"
 
 export default function Loading() {
   return (
     <main className="mx-auto flex w-full flex-col gap-6 p-4 md:p-8">
-      <Skeleton className="h-4 w-48" />
-      <MembershipLinkContentLoading config={CLIENTS_ROUTE_CONFIG} />
+      <AnimatedLoading />
     </main>
   )
 }

@@ -151,6 +151,10 @@ export function BrandsList() {
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
+          hasSearched={hasSearched}
+          appliedValues={{
+            description: appliedClientCriteria.description,
+          }}
           searchLabel="Buscar marcas"
           searchTooltip="Buscar marcas de produto"
           loadingLabel="Carregando marcas..."

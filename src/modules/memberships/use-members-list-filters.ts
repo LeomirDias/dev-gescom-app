@@ -4,102 +4,152 @@ import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { z } from "zod"
+import {
+  defaultMembersDraftFilters,
+  MEMBERS_NAME_SEARCH_LIMIT,
+  type MembersDraftFilters,
+} from "@/app/(app_routes)/members/_components/members-constants"
 import { cpfCnpjSchema } from "@/lib/validation/cpf-cnpj"
 import { phoneE164Schema } from "@/lib/validation/phone"
-import type { MembershipRouteConfig } from "@/modules/memberships/membership-route-config"
-import type { ListMembersQuery } from "@/modules/memberships/memberships.schema"
 import {
-  parseMembershipSearchTerm,
-  type ParsedMembershipSearch,
+  normalizeEmail,
+  normalizePhone,
+  normalizeRegistration,
 } from "@/modules/memberships/memberships-rules"
+import type { ListMembersQuery } from "@/modules/memberships/memberships.schema"
 
-const MEMBERS_NAME_SEARCH_LIMIT = 100
 const emailSchema = z.string().trim().email()
 
-function buildSearchFilters(
-  parsed: ParsedMembershipSearch,
-  draftFilters: ListMembersQuery,
+function parseCode(value: string): number | undefined {
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  const parsed = Number(trimmed)
+  if (!Number.isInteger(parsed) || parsed <= 0) return undefined
+  return parsed
+}
+
+function hasAnySearchCriteria(draft: MembersDraftFilters): boolean {
+  return (
+    draft.code.trim().length > 0 ||
+    draft.name.trim().length > 0 ||
+    draft.registration.trim().length > 0 ||
+    draft.email.trim().length > 0 ||
+    draft.phone.trim().length > 0
+  )
+}
+
+function buildApiFilters(
+  draft: MembersDraftFilters,
   defaults: ListMembersQuery
-): ListMembersQuery | null {
-  const base: ListMembersQuery = {
+): {
+  filters: ListMembersQuery
+  clientNameFilter?: string
+  usesClientPagination: boolean
+} | null {
+  const codeRaw = draft.code.trim()
+  const name = draft.name.trim()
+  const registrationRaw = draft.registration.trim()
+  const emailRaw = draft.email.trim()
+  const phoneRaw = draft.phone.trim()
+
+  const usesClientPagination = name.length >= 2
+
+  const filters: ListMembersQuery = {
     ...defaults,
-    status: draftFilters.status,
-    class: draftFilters.class ?? defaults.class,
-    limit:
-      parsed.kind === "name"
-        ? MEMBERS_NAME_SEARCH_LIMIT
-        : (draftFilters.limit ?? defaults.limit),
     offset: 0,
+    code: undefined,
     registration: undefined,
     email: undefined,
     phone: undefined,
+    limit: usesClientPagination
+      ? MEMBERS_NAME_SEARCH_LIMIT
+      : (defaults.limit ?? 50),
   }
 
-  switch (parsed.kind) {
-    case "empty":
-      return base
-    case "email": {
-      const valid = emailSchema.safeParse(parsed.email)
-      if (!valid.success) {
-        toast.error("E-mail inválido.")
-        return null
-      }
-      return { ...base, email: valid.data }
+  if (name.length > 0) {
+    if (name.length < 2) {
+      toast.error("Informe ao menos 2 caracteres para buscar por nome.")
+      return null
     }
-    case "registration": {
-      const valid = cpfCnpjSchema.safeParse(parsed.registration)
-      if (!valid.success) {
-        toast.error("CPF/CNPJ inválido.")
-        return null
-      }
-      return { ...base, registration: valid.data }
+  }
+
+  if (codeRaw) {
+    const parsed = parseCode(codeRaw)
+    if (parsed === undefined) {
+      toast.error("Código inválido.")
+      return null
     }
-    case "phone": {
-      const valid = phoneE164Schema.safeParse(parsed.phone)
-      if (!valid.success) {
-        toast.error("Telefone inválido. Use o formato (DD) 9XXXX-XXXX.")
-        return null
-      }
-      return { ...base, phone: valid.data }
+    filters.code = parsed
+  }
+
+  if (registrationRaw) {
+    const valid = cpfCnpjSchema.safeParse(normalizeRegistration(registrationRaw))
+    if (!valid.success) {
+      toast.error("CPF/CNPJ inválido.")
+      return null
     }
-    case "name":
-      if (parsed.name.length < 2) {
-        toast.error("Informe ao menos 2 caracteres para buscar por nome.")
-        return null
-      }
-      return base
+    filters.registration = valid.data
+  }
+
+  if (emailRaw) {
+    const valid = emailSchema.safeParse(normalizeEmail(emailRaw))
+    if (!valid.success) {
+      toast.error("E-mail inválido.")
+      return null
+    }
+    filters.email = valid.data
+  }
+
+  if (phoneRaw) {
+    const valid = phoneE164Schema.safeParse(normalizePhone(phoneRaw))
+    if (!valid.success) {
+      toast.error("Telefone inválido. Use o formato (DD) 9XXXX-XXXX.")
+      return null
+    }
+    filters.phone = valid.data
+  }
+
+  return {
+    filters,
+    clientNameFilter: usesClientPagination ? name : undefined,
+    usesClientPagination,
   }
 }
 
-export function useMembersListFilters(config: MembershipRouteConfig) {
+export function useMembersListFilters(defaultListFilters: ListMembersQuery) {
   const router = useRouter()
-  const defaults = useMemo(() => config.defaultListFilters(), [config])
+  const defaults = useMemo(() => defaultListFilters, [defaultListFilters])
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [clientNameFilter, setClientNameFilter] = useState<string | undefined>()
-  const [draftFilters, setDraftFilters] = useState<ListMembersQuery>(defaults)
+  const [draftFilters, setDraftFilters] = useState(defaultMembersDraftFilters)
   const [appliedFilters, setAppliedFilters] =
     useState<ListMembersQuery>(defaults)
+  const [clientNameFilter, setClientNameFilter] = useState<string | undefined>()
+  const [hasSearched, setHasSearched] = useState(false)
+  const [isClientPagination, setIsClientPagination] = useState(false)
+
+  const applyFiltersState = useCallback(
+    (draft: MembersDraftFilters) => {
+      const built = buildApiFilters(draft, defaults)
+      if (!built) return false
+
+      setDraftFilters(draft)
+      setAppliedFilters(built.filters)
+      setClientNameFilter(built.clientNameFilter)
+      setIsClientPagination(built.usesClientPagination)
+      setHasSearched(true)
+      return true
+    },
+    [defaults]
+  )
 
   const applySearch = useCallback((): boolean => {
-    const parsed = parseMembershipSearchTerm(searchTerm)
-    const next = buildSearchFilters(parsed, draftFilters, defaults)
-    if (!next) return false
+    if (!hasAnySearchCriteria(draftFilters)) {
+      toast.error("Informe ao menos um critério de busca.")
+      return false
+    }
 
-    setClientNameFilter(parsed.kind === "name" ? parsed.name : undefined)
-    setAppliedFilters(next)
-    return true
-  }, [searchTerm, draftFilters, defaults])
-
-  const applyFilters = useCallback((): boolean => {
-    const parsed = parseMembershipSearchTerm(searchTerm)
-    const next = buildSearchFilters(parsed, draftFilters, defaults)
-    if (!next) return false
-
-    setClientNameFilter(parsed.kind === "name" ? parsed.name : undefined)
-    setAppliedFilters(next)
-    return true
-  }, [searchTerm, draftFilters, defaults])
+    return applyFiltersState(draftFilters)
+  }, [draftFilters, applyFiltersState])
 
   const handleSearchResult = useCallback(
     (items: { id: string }[]) => {
@@ -111,31 +161,30 @@ export function useMembersListFilters(config: MembershipRouteConfig) {
   )
 
   const clearFilters = useCallback(() => {
-    const reset = config.defaultListFilters()
-    setSearchTerm("")
-    setClientNameFilter(undefined)
-    setDraftFilters(reset)
+    const reset = defaultListFilters
+    setDraftFilters(defaultMembersDraftFilters())
     setAppliedFilters(reset)
-  }, [config])
+    setClientNameFilter(undefined)
+    setIsClientPagination(false)
+    setHasSearched(false)
+  }, [defaultListFilters])
 
   const setPageOffset = useCallback((offset: number) => {
     setAppliedFilters((filters) => ({ ...filters, offset }))
   }, [])
 
   const setLimit = useCallback((limit: number) => {
-    setDraftFilters((f) => ({ ...f, limit }))
-    setAppliedFilters((f) => ({ ...f, limit, offset: 0 }))
+    setAppliedFilters((filters) => ({ ...filters, limit, offset: 0 }))
   }, [])
 
   return {
-    searchTerm,
-    setSearchTerm,
-    clientNameFilter,
     draftFilters,
     setDraftFilters,
     appliedFilters,
+    clientNameFilter,
+    hasSearched,
+    isClientPagination,
     applySearch,
-    applyFilters,
     handleSearchResult,
     clearFilters,
     setPageOffset,

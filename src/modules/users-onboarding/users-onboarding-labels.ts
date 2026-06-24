@@ -10,11 +10,13 @@ import type {
 const GENDER_LABELS: Record<Gender, string> = {
   FEMININO: "Feminino",
   MASCULINO: "Masculino",
+  "NÃO_INFORMADO": "Não informado",
 }
 
 export const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "FEMININO", label: "Feminino" },
   { value: "MASCULINO", label: "Masculino" },
+  { value: "NÃO_INFORMADO", label: "Não informado" },
 ]
 
 export function getGenderLabel(value: string | null | undefined): string {
@@ -130,15 +132,13 @@ export function getUserContactTypeLabel(value: string): string {
 }
 
 const CREDIT_TYPE_LABELS: Record<CreditType, string> = {
-  CREDITO: "Crédito",
-  DEBITO: "Débito",
-  OUTRO: "Outro",
+  MENSAL: "Mensal",
+  GERAL: "Geral",
 }
 
 export const CREDIT_TYPE_OPTIONS: { value: CreditType; label: string }[] = [
-  { value: "CREDITO", label: "Crédito" },
-  { value: "DEBITO", label: "Débito" },
-  { value: "OUTRO", label: "Outro" },
+  { value: "MENSAL", label: "Mensal" },
+  { value: "GERAL", label: "Geral" },
 ]
 
 export function getCreditTypeLabel(value: string | null | undefined): string {
