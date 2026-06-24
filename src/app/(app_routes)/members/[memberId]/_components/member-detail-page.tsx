@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/card"
 import { useRequireEnterprise } from "@/hooks/use-require-enterprise"
 import { useOperatorPermissions, PERMISSION_CODES } from "@/lib/permissions"
+import { isClienteClass } from "@/modules/memberships/memberships-rules"
 import { useMemberQuery } from "@/modules/memberships/use-members"
 import { buildEmptyUserDetails } from "@/modules/users-onboarding/users-onboarding-empty"
 import { useUserDetailsQuery } from "@/modules/users-onboarding/use-users-onboarding"
@@ -35,12 +36,24 @@ import { AnimatedLoading } from "@/components/global/loading/animated-loading"
 
 const memberIdSchema = z.uuid()
 
+type MemberDetailPageVariant = "member" | "client"
+
 export function MemberDetailPage({
+  variant = "member",
+}: {
+  variant?: MemberDetailPageVariant
 }) {
   const params = useParams()
-  const rawId = typeof params["memberId"] === "string" ? params["memberId"] : ""
+  const idParamKey = variant === "client" ? "clientId" : "memberId"
+  const rawId =
+    typeof params[idParamKey] === "string" ? params[idParamKey] : ""
   const idResult = memberIdSchema.safeParse(rawId)
   const memberId = idResult.success ? idResult.data : null
+
+  const isClient = variant === "client"
+  const entityLabel = isClient ? "cliente" : "membro"
+  const entityLabelCap =
+    entityLabel.charAt(0).toUpperCase() + entityLabel.slice(1)
 
   const { ready, enterpriseId } = useRequireEnterprise()
   const perms = useOperatorPermissions()
@@ -70,7 +83,7 @@ export function MemberDetailPage({
 
   const { errMessage, errMeta } = useListErrorState(
     error,
-    "Não foi possível carregar o membro."
+    `Não foi possível carregar o ${entityLabel}.`
   )
 
   const {
@@ -116,7 +129,7 @@ export function MemberDetailPage({
         <RouteBreadcrumb />
         <Card className="max-w-lg">
           <CardHeader>
-            <CardTitle>Membro inválido</CardTitle>
+            <CardTitle>{entityLabelCap} inválido</CardTitle>
             <CardDescription>Identificador UUID inválido.</CardDescription>
           </CardHeader>
         </Card>
@@ -157,16 +170,27 @@ export function MemberDetailPage({
 
         {error && !data && !isPending && (
           <ListErrorCard
-            title="Erro ao carregar o membro"
+            title={`Erro ao carregar o ${entityLabel}`}
             message={errMessage}
             meta={errMeta}
           />
         )}
 
+        {data && !isPending && enterpriseId && isClient && !isClienteClass(data.class) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Cliente não encontrado</CardTitle>
+              <CardDescription>
+                Este vínculo não pertence à classe cliente.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+
         {data && !isPending && !enterpriseId && (
           <Card>
             <CardHeader>
-              <CardTitle>Membro não encontrado</CardTitle>
+              <CardTitle>{entityLabelCap} não encontrado</CardTitle>
               <CardDescription>
                 Este vínculo não pertence à classe esperada.
               </CardDescription>
@@ -174,7 +198,10 @@ export function MemberDetailPage({
           </Card>
         )}
 
-        {data && !isPending && enterpriseId && (
+        {data &&
+          !isPending &&
+          enterpriseId &&
+          (!isClient || isClienteClass(data.class)) && (
           <div className="space-y-6">
             <MemberDetailHeader member={data} />
 
@@ -191,6 +218,8 @@ export function MemberDetailPage({
                 enterpriseId={enterpriseId}
                 canEdit={perms.canAlterMembers}
                 onUpdateSuccess={() => void refetch()}
+                lockClass={isClient}
+                redirectAfterDelete={isClient ? "/clients" : "/members"}
               />
             </div>
 
@@ -223,12 +252,14 @@ export function MemberDetailPage({
               </Card>
             )}
 
-            <MemberDepartmentsSection
-              enterpriseId={enterpriseId}
-              member={data}
-              canAlter={perms.canAlterMembers}
-              canAlterPermissions={perms.canAlterPermissions}
-            />
+            {!isClient && (
+              <MemberDepartmentsSection
+                enterpriseId={enterpriseId}
+                member={data}
+                canAlter={perms.canAlterMembers}
+                canAlterPermissions={perms.canAlterPermissions}
+              />
+            )}
           </div>
         )}
       </PaginatedListLayout>

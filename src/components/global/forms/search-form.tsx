@@ -3,6 +3,7 @@
 import { Loader2, Search } from "lucide-react"
 import type { FormEvent, ReactNode } from "react"
 
+import { formInputFocusClassName } from "@/components/global/forms/form-input-classes"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -27,6 +28,7 @@ type SearchFormProps = {
     searchLabel?: string
     searchTooltip?: string
     idPrefix?: string
+    formClassName?: string
     footer?: ReactNode
     loadingLabel?: string
     /** Indica se uma busca já foi executada (habilita destaque de filtros aplicados). */
@@ -46,7 +48,7 @@ function resolveFieldApplied(
     return typeof applied === "string" && applied.trim().length > 0
 }
 
-type SearchFormFloatingInputProps = {
+type SearchFormInputProps = {
     id: string
     label: string
     value: string
@@ -58,7 +60,7 @@ type SearchFormFloatingInputProps = {
     isApplied?: boolean
 }
 
-function SearchFormFloatingInput({
+function SearchFormInput({
     id,
     label,
     value,
@@ -68,43 +70,21 @@ function SearchFormFloatingInput({
     ariaLabel,
     inputMode,
     isApplied = false,
-}: SearchFormFloatingInputProps) {
-    const floatingLabel = placeholder ?? label
-
+}: SearchFormInputProps) {
     return (
-        <div className="relative">
-            <Input
-                id={id}
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-                placeholder=" "
-                disabled={disabled}
-                aria-label={ariaLabel ?? label}
-                inputMode={inputMode}
-                className={cn(
-                    "peer h-11 px-3 pb-2 pt-5 transition-[border-color,box-shadow,background-color]",
-                    isApplied &&
-                    "border-primary/60 bg-primary/5 dark:border-primary/50 dark:bg-primary/10",
-                    "focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/25",
-                    isApplied &&
-                    "focus-visible:border-primary focus-visible:ring-primary/30"
-                )}
-            />
-            <label
-                htmlFor={id}
-                className={cn(
-                    "pointer-events-none absolute left-2.5 z-10 max-w-[calc(100%-1.25rem)] truncate",
-                    "origin-left text-sm text-muted-foreground transition-all duration-200",
-                    "top-1/2 -translate-y-1/2",
-                    "peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:scale-[0.85] peer-focus:bg-card/5 peer-focus:backdrop-blur-[6px] peer-focus:px-0.5 peer-focus:font-medium peer-focus:text-primary",
-                    "peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:scale-[0.85] peer-[:not(:placeholder-shown)]:bg-card peer-[:not(:placeholder-shown)]:px-1 peer-[:not(:placeholder-shown)]:text-foreground",
-                    isApplied &&
-                    "peer-[:not(:placeholder-shown)]:bg-card/5 peer-[:not(:placeholder-shown)]:backdrop-blur-[6px] peer-[:not(:placeholder-shown)]:px-0.5 peer-[:not(:placeholder-shown)]:font-medium peer-[:not(:placeholder-shown)]:text-primary"
-                )}
-            >
-                {floatingLabel}
-            </label>
-        </div>
+        <Input
+            id={id}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={placeholder ?? label}
+            disabled={disabled}
+            aria-label={ariaLabel ?? label}
+            inputMode={inputMode}
+            className={cn(
+                formInputFocusClassName,
+                isApplied && "border-primary/60 dark:border-primary/50"
+            )}
+        />
     )
 }
 
@@ -115,6 +95,7 @@ export function SearchForm({
     searchLabel = "Buscar",
     searchTooltip,
     idPrefix = "search",
+    formClassName,
     footer,
     loadingLabel = "Carregando...",
     hasSearched = false,
@@ -129,16 +110,11 @@ export function SearchForm({
     }
 
     return (
-        <div className="border-b border-border pb-4 bg-background shadow-none">
-
-            {/* <div className="flex items-center justify-start gap-2 pl-4 pt-4">
-                {title && <p className="text-lg font-bold text-muted-foreground">{title}</p>}
-            </div> */}
-
+        <div className={cn("shadow-none", formClassName)}>
             <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {fields.map((field) => (
-                        <SearchFormFloatingInput
+                        <SearchFormInput
                             key={field.id}
                             id={`${idPrefix}-${field.id}`}
                             label={field.label}

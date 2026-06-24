@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/global/structural/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Field, FieldGroup } from "@/components/ui/field"
+import { formInputFocusClassName } from "@/components/global/forms/form-input-classes"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
@@ -75,6 +76,7 @@ export function PageFormCard({
                 autoComplete={field.autoComplete}
                 placeholder={field.placeholder}
                 required={field.required}
+                className={formInputFocusClassName}
               />
             </Field>
           ))}

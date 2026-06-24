@@ -3,19 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useRegisterPageRefresh } from "@/app/(app_routes)/_components/page-refresh"
-import { MemberDetailDialog } from "@/app/(app_routes)/members/_components/member-detail-dialog"
-import { CreateMemberDialog } from "@/app/(app_routes)/members/_components/create-member-dialog"
-import { InviteMemberDialog } from "@/app/(app_routes)/members/_components/invite-member-dialog"
-import { MembersListActions } from "@/app/(app_routes)/members/_components/members-list-actions"
-import { MembersTableRows } from "@/app/(app_routes)/members/_components/members-table-rows"
 import {
-  MEMBER_FILTER_FIELDS,
-  membersIdleHint,
-  membersIdleTitle,
-  membersListSubtitle,
-  membersListTitle,
-  membersSearchingTitle,
-} from "@/app/(app_routes)/members/_components/members-constants"
+  CLIENT_FILTER_FIELDS,
+  CLIENTS_IDLE_HINT,
+  CLIENTS_IDLE_TITLE,
+  CLIENTS_LIST_SUBTITLE,
+  CLIENTS_LIST_TITLE,
+  CLIENTS_SEARCHING_TITLE,
+} from "@/app/(app_routes)/clients/_components/clients-constants"
+import { ClientsListActions } from "@/app/(app_routes)/clients/_components/clients-list-actions"
+import { ClientsTableRows } from "@/app/(app_routes)/clients/_components/clients-table-rows"
 import { SearchForm } from "@/components/global/forms/search-form"
 import {
   EnterprisePermissionGuard,
@@ -31,16 +28,29 @@ import {
 import { TableListing } from "@/components/global/listing/table-listing"
 import { PageHeader } from "@/components/global/structural/page-header"
 import { PERMISSION_CODES } from "@/lib/permissions"
-import { filterMembersByName } from "@/modules/memberships/memberships-rules"
+import {
+  CLIENT_MEMBER_CLASS,
+  filterMembersByName,
+} from "@/modules/memberships/memberships-rules"
 import { useMembersListFilters } from "@/modules/memberships/use-members-list-filters"
 import { useMembersQuery } from "@/modules/memberships/use-members"
+import { ClientDetailDialog } from "./client-detail-dialog"
+import { LinkClientDialog } from "./link-client-dialog"
+import { CreateClientDialog } from "./create-client-dialog"
 
-export function MembersList() {
+const DEFAULT_CLIENT_LIST_FILTERS = {
+  class: CLIENT_MEMBER_CLASS,
+  userId: undefined,
+  offset: 0,
+  limit: 50,
+} as const
+
+export function ClientsList() {
   const { ready, enterpriseId, perms } = useEnterprisePermissionAccess()
   const isExplicitSearch = useRef(false)
-  const [viewMemberId, setViewMemberId] = useState<string | null>(null)
+  const [viewClientId, setViewClientId] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
-  const [inviteOpen, setInviteOpen] = useState(false)
+  const [linkOpen, setLinkOpen] = useState(false)
 
   const {
     draftFilters,
@@ -55,12 +65,8 @@ export function MembersList() {
     setPageOffset,
     setLimit,
   } = useMembersListFilters({
-    defaultListFilters: {
-      class: undefined,
-      userId: undefined,
-      offset: 0,
-      limit: 50,
-    },
+    defaultListFilters: DEFAULT_CLIENT_LIST_FILTERS,
+    singleResultPath: "/clients",
   })
 
   const { data, error, isPending, isFetching, refetch } = useMembersQuery({
@@ -112,7 +118,7 @@ export function MembersList() {
 
   const searchFields = useMemo(
     () =>
-      MEMBER_FILTER_FIELDS.map(
+      CLIENT_FILTER_FIELDS.map(
         ({ id, key, label, placeholder, inputMode, numericOnly }) => ({
           id,
           label,
@@ -167,19 +173,17 @@ export function MembersList() {
 
   const { errMessage, errMeta } = useListErrorState(
     error,
-    "Não foi possível carregar os membros."
+    "Não foi possível carregar os clientes."
   )
 
   const isSearching = hasSearched && (isFetching || isPending)
   const showStaleBanner = hasSearched && Boolean(error) && Boolean(data)
 
-  const plural = "membros"
-
-  function handleMemberFormSuccess(memberId: string) {
+  function handleClientFormSuccess(clientId: string) {
     setCreateOpen(false)
-    setInviteOpen(false)
+    setLinkOpen(false)
     if (hasSearched) void refetch()
-    setViewMemberId(memberId)
+    setViewClientId(clientId)
   }
 
   return (
@@ -189,21 +193,21 @@ export function MembersList() {
     >
       <PaginatedListLayout>
         <PageHeader
-          title={membersListTitle(plural)}
-          subtitle={membersListSubtitle(plural)}
+          title={CLIENTS_LIST_TITLE}
+          subtitle={CLIENTS_LIST_SUBTITLE}
           actions={
-            <MembersListActions
+            <ClientsListActions
               canCreate={perms.canCreateMemberWithUser}
-              canInvite={perms.canCreateMemberWithUser}
+              canLink={perms.canCreateMemberWithUser}
               onCreate={() => setCreateOpen(true)}
-              onInvite={() => setInviteOpen(true)}
+              onLink={() => setLinkOpen(true)}
             />
           }
         />
 
         <SearchForm
-          title={`Buscar ${plural}`}
-          idPrefix="members-filters-form"
+          title="Buscar clientes"
+          idPrefix="clients-filters-form"
           fields={searchFields}
           onSearch={handleSearch}
           isSearching={isSearching}
@@ -216,9 +220,9 @@ export function MembersList() {
             email: appliedFilters.email,
             phone: appliedFilters.phone,
           }}
-          searchLabel={`Buscar ${plural}`}
-          searchTooltip={`Buscar ${plural}`}
-          loadingLabel={membersSearchingTitle(plural)}
+          searchLabel="Buscar clientes"
+          searchTooltip="Buscar clientes"
+          loadingLabel={CLIENTS_SEARCHING_TITLE}
         />
 
         {showStaleBanner && <StaleDataBanner message={errMessage} />}
@@ -227,12 +231,12 @@ export function MembersList() {
           hasSearched={hasSearched}
           isSearching={isSearching}
           error={hasSearched && error && !data ? error : null}
-          idleTitle={membersIdleTitle(plural)}
-          idleHint={membersIdleHint(plural)}
-          searchingTitle={membersSearchingTitle(plural)}
+          idleTitle={CLIENTS_IDLE_TITLE}
+          idleHint={CLIENTS_IDLE_HINT}
+          searchingTitle={CLIENTS_SEARCHING_TITLE}
           errorDetails={
             <ListErrorCard
-              title={`Erro ao carregar os ${plural}`}
+              title="Erro ao carregar os clientes"
               message={errMessage}
               meta={errMeta}
             />
@@ -246,17 +250,15 @@ export function MembersList() {
             total={listing.total}
             limit={listing.limit}
             offset={listing.offset}
-            emptyTitle={`Nenhum ${plural} encontrado`}
-            emptyHint={`Ajuste os filtros ou adicione um novo ${plural}.`}
+            emptyTitle="Nenhum cliente encontrado"
+            emptyHint="Ajuste os filtros ou adicione um novo cliente."
             onPageChange={setPageOffset}
             onLimitChange={setLimit}
             onClearFilters={clearFilters}
           >
-            <MembersTableRows
+            <ClientsTableRows
               items={listing.items}
-              pluralLabel={plural}
-              showClassColumn={true}
-              onView={setViewMemberId}
+              onView={setViewClientId}
             />
           </TableListing>
         </ListingSearchResult>
@@ -264,27 +266,27 @@ export function MembersList() {
 
       {enterpriseId && (
         <>
-          <CreateMemberDialog
+          <CreateClientDialog
             open={createOpen}
             onOpenChange={setCreateOpen}
             enterpriseId={enterpriseId}
-            onSuccess={handleMemberFormSuccess}
+            onSuccess={handleClientFormSuccess}
           />
-          <InviteMemberDialog
-            open={inviteOpen}
-            onOpenChange={setInviteOpen}
+          <LinkClientDialog
+            open={linkOpen}
+            onOpenChange={setLinkOpen}
             enterpriseId={enterpriseId}
-            onSuccess={handleMemberFormSuccess}
+            onSuccess={handleClientFormSuccess}
           />
         </>
       )}
 
-      {viewMemberId && (
-        <MemberDetailDialog
-          memberId={viewMemberId}
+      {viewClientId && (
+        <ClientDetailDialog
+          clientId={viewClientId}
           open
           onOpenChange={(open) => {
-            if (!open) setViewMemberId(null)
+            if (!open) setViewClientId(null)
           }}
         />
       )}

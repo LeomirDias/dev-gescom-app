@@ -8,8 +8,6 @@ export const ROUTE_LABELS: Record<string, string> = {
   "/notifications": "Notificações",
   "/support": "Suporte",
   "/clients": "Clientes",
-  "/clients/new": "Novo cliente",
-  "/clients/link": "Vincular cliente",
   "/products": "Produtos",
   "/products/catalogs": "Catálogos",
   "/products/promotional-prices": "Preços promocionais",

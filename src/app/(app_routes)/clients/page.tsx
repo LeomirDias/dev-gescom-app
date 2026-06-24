@@ -1,7 +1,7 @@
 "use client"
 
-import { MembersList } from "@/app/(app_routes)/members/_components/members-list"
+import { ClientsList } from "@/app/(app_routes)/clients/_components/clients-list"
 
 export default function ClientsPage() {
-  return <MembersList classValue="clients" />
+  return <ClientsList />
 }

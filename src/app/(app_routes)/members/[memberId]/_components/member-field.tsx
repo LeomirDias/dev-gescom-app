@@ -468,11 +468,15 @@ export function MemberLinkCard({
   enterpriseId,
   canEdit,
   onUpdateSuccess,
+  lockClass = false,
+  redirectAfterDelete = "/members",
 }: {
   member: MemberDetail
   enterpriseId: string
   canEdit?: boolean
   onUpdateSuccess?: () => void
+  lockClass?: boolean
+  redirectAfterDelete?: string
 }) {
   const router = useRouter()
   const mutation = useUpdateMemberMutation(enterpriseId, member.id)
@@ -503,7 +507,7 @@ export function MemberLinkCard({
 
   async function handleSave() {
     const patch: { class?: EnterpriseMemberClass; status?: MemberStatus } = {}
-    if (memberClass !== member.class) {
+    if (!lockClass && memberClass !== member.class) {
       patch.class = memberClass
     }
     if (status !== member.status) patch.status = status
@@ -527,7 +531,7 @@ export function MemberLinkCard({
     try {
       await mutation.mutateAsync({ softDelete: true })
       setConfirmDelete(false)
-      router.push("/members")
+      router.push(redirectAfterDelete)
     } catch {
       /* erros de mutação tratados globalmente pelo QueryClient */
     }
@@ -585,16 +589,20 @@ export function MemberLinkCard({
 
             <MemberFieldReveal open={editing}>
               <div className="grid gap-4 sm:grid-cols-2">
-                <MemberField
-                  label="Classe"
-                  value={getMemberClassLabel(member.class)}
-                  icon={BadgeCheck}
-                  editing
-                  editValue={memberClass}
-                  onEditChange={(v) => setMemberClass(v as EnterpriseMemberClass)}
-                  editSelectOptions={MEMBER_CLASS_OPTIONS}
-                  inputId="member-class"
-                />
+                {!lockClass && (
+                  <MemberField
+                    label="Classe"
+                    value={getMemberClassLabel(member.class)}
+                    icon={BadgeCheck}
+                    editing
+                    editValue={memberClass}
+                    onEditChange={(v) =>
+                      setMemberClass(v as EnterpriseMemberClass)
+                    }
+                    editSelectOptions={MEMBER_CLASS_OPTIONS}
+                    inputId="member-class"
+                  />
+                )}
                 <MemberField
                   label="Status"
                   value={getMemberStatusLabel(member.status)}

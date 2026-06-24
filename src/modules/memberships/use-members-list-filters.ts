@@ -116,7 +116,15 @@ function buildApiFilters(
   }
 }
 
-export function useMembersListFilters(defaultListFilters: ListMembersQuery) {
+export type UseMembersListFiltersOptions = {
+  defaultListFilters: ListMembersQuery
+  singleResultPath?: string
+}
+
+export function useMembersListFilters({
+  defaultListFilters,
+  singleResultPath = "/members",
+}: UseMembersListFiltersOptions) {
   const router = useRouter()
   const defaults = useMemo(() => defaultListFilters, [defaultListFilters])
 
@@ -154,10 +162,10 @@ export function useMembersListFilters(defaultListFilters: ListMembersQuery) {
   const handleSearchResult = useCallback(
     (items: { id: string }[]) => {
       if (items.length === 1) {
-        router.push(`/members/${items[0].id}`)
+        router.push(`${singleResultPath}/${items[0].id}`)
       }
     },
-    [router]
+    [router, singleResultPath]
   )
 
   const clearFilters = useCallback(() => {
