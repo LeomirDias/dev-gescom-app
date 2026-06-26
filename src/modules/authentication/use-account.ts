@@ -15,7 +15,7 @@ function useMeQueryEnabled() {
   }
 }
 
-/** Resposta completa de `GET /auth/me` (utilizador, empresa do token, permissões). */
+/** Resposta completa de `GET /auth/me` (usuário, empresa do token, permissões). */
 export function useMeQuery() {
   const { enabled } = useMeQueryEnabled()
   const { signOut } = useAuthSession()
@@ -36,7 +36,7 @@ export function useMeQuery() {
   })
 }
 
-/** Resposta simplificada de `GET /auth/me` (utilizador). */
+/** Resposta simplificada de `GET /auth/me` (usuário). */
 export function useAccountProfileQuery() {
   const { enabled } = useMeQueryEnabled()
   return useQuery({

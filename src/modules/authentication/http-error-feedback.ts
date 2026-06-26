@@ -10,7 +10,7 @@ const MESSAGE_OVERRIDES: Partial<Record<string, string>> = {
   PASSWORD_RESET_EMAIL_RATE_LIMITED:
     "Limite de envios de codigo atingido. Tente mais tarde.",
   USE_MEMBERSHIP_INVITE:
-    "Utilizador com credenciais deve ser convidado. Use o fluxo de convite.",
+    "usuário com credenciais deve ser convidado. Use o fluxo de convite.",
   ENTERPRISE_CONFLICT:
     "Dados da empresa em conflito com cadastro existente. Revise CPF/CNPJ ou nomes duplicados.",
   ADDRESS_HIERARCHY_MISMATCH:

@@ -81,7 +81,7 @@ export function CreateMemberWithUserForm({
   subtitle,
   submitLabel = "Criar membro",
   pendingLabel = "Criando membro...",
-  emptyFieldsMessage = "utilizador",
+  emptyFieldsMessage = "usuário",
   onSuccess,
 }: CreateMemberWithUserFormProps) {
   const router = useRouter()

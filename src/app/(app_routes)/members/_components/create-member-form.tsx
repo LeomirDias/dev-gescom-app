@@ -15,7 +15,7 @@ export function CreateMemberForm(props: CreateMemberFormProps) {
     <CreateMemberWithUserForm
       variant="sheet"
       defaultClass="COLABORADOR"
-      emptyFieldsMessage="utilizador"
+      emptyFieldsMessage="usuário"
       {...props}
     />
   )

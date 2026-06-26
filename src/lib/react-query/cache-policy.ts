@@ -10,7 +10,7 @@ export const CACHE = {
   tenantList: 30_000,
   /** Detalhes em edição ou dados altamente voláteis. */
   tenantDetail: 0,
-  /** Sessão / conta do utilizador. */
+  /** Sessão / conta do usuário. */
   account: 5 * 60_000,
   /** Analytics e dashboards. */
   analytics: 60_000,

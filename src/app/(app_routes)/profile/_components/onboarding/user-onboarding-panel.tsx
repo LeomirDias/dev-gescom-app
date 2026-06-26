@@ -46,7 +46,7 @@ export function UserOnboardingPanel({
   memberId,
   canAlter,
   isLoading,
-  title = "Onboarding do utilizador",
+  title = "Onboarding do usuário",
   description = "Informações pessoais, endereços, contatos e dados fiscais/financeiros.",
 }: {
   details: UserDetailsResponse | undefined
@@ -87,7 +87,7 @@ export function UserOnboardingPanel({
         value={section}
         onValueChange={setSection}
         options={ONBOARDING_SECTIONS}
-        ariaLabel="Seções do onboarding do utilizador"
+        ariaLabel="Seções do onboarding do usuário"
         idPrefix="user-onboarding"
       />
 

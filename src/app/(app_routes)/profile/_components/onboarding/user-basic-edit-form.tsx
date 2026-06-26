@@ -118,7 +118,7 @@ export function UserBasicEditForm({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Editar dados do utilizador</SheetTitle>
+          <SheetTitle>Editar dados do usuário</SheetTitle>
           <SheetDescription>
             Altere nome, CPF/CNPJ, e-mail ou telefone. Credenciais de login podem
             ser sincronizadas automaticamente.

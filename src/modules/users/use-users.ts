@@ -86,7 +86,7 @@ export function useCreateUserMutation(enterpriseId: string) {
   return useMutationWithToast({
     mutationFn: (input: CreateUserRequest) =>
       createUserService(enterpriseId, input),
-    successMessage: "Utilizador criado com sucesso.",
+    successMessage: "usuário criado com sucesso.",
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["users", enterpriseId] })
     },

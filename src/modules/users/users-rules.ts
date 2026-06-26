@@ -30,7 +30,7 @@ export const USERS_UI_PAGE_SIZE = 50
 
 /**
  * Maximo de paginas ao percorrer toda a API em busca por nome.
- * Com pageSize 100 → ate 1000 utilizadores.
+ * Com pageSize 100 → ate 1000 usuárioes.
  *
  * Diferente da lista de membros (`use-members-list-filters`), que carrega
  * apenas uma pagina e filtra localmente.
@@ -39,7 +39,7 @@ export const USERS_MAX_FETCH_PAGES = 10
 
 export function usersNameSearchLimitWarning(): string {
   const maxUsers = USERS_API_LIST_LIMIT * USERS_MAX_FETCH_PAGES
-  return `Busca por nome limitada aos primeiros ${maxUsers} utilizadores carregados da API.`
+  return `Busca por nome limitada aos primeiros ${maxUsers} usuárioes carregados da API.`
 }
 
 /** @deprecated Use usersNameSearchLimitWarning() para texto com teto atualizado. */
